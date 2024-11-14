@@ -1,0 +1,37 @@
+name: Yggdrasil
+version: '1.0-SNAPSHOT'
+main: dev.heypr.yggdrasil.Yggdrasil
+api-version: '1.20'
+prefix: Yggdrasil
+load: STARTUP
+authors: [ heypr ]
+description: A velocity port of the bungee-reconnect plugin.
+commands:
+  lives:
+    permission: yggdrasil.lives
+    description: Shows the number of lives you have left.
+    aliases: [l]
+  givelife:
+    permission: yggdrasil.givelife
+    description: Sets the number of lives you have left.
+    aliases: [sl]
+  startsession:
+    permission: yggdrasil.startsession
+    description: Starts the game session.
+    aliases: [s]
+  stopsession:
+    permission: yggdrasil.stopsession
+    description: Stops the game session.
+    aliases: [sg]
+  removeboogeyman:
+    permission: yggdrasil.removeboogeyman
+    description: Removes the boogeyman from the game.
+    aliases: [rbm]
+  setboogeyman:
+    permission: yggdrasil.setboogeyman
+    description: Sets the boogeyman.
+    aliases: [sbm]
+  addplayer:
+    permission: yggdrasil.addplayer
+    description: Adds a player to the game.
+    aliases: [ap]
