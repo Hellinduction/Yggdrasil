@@ -32,12 +32,12 @@ public class RemoveBoogeymanCommand implements CommandExecutor {
             }
 
             if (!plugin.getPlayerData().get(target.getUniqueId()).isBoogeyman()) {
-                sender.sendMessage(target.name() + " was not a Boogeyman.");
+                sender.sendMessage(target.getName() + " was not a Boogeyman.");
                 return true;
             }
 
             plugin.getPlayerData().get(target.getUniqueId()).setBoogeyman(false);
-            sender.sendMessage(target.name() + " is no longer a Boogeyman.");
+            sender.sendMessage(target.getName() + " is no longer a Boogeyman.");
             return true;
         }
         else {

@@ -5,32 +5,38 @@ api-version: '1.20'
 prefix: Yggdrasil
 load: STARTUP
 authors: [ heypr ]
-description: A velocity port of the bungee-reconnect plugin.
+description: One Life gamemode.
 commands:
   lives:
     permission: yggdrasil.lives
     description: Shows the number of lives you have left.
     aliases: [l]
+  setlives:
+    permission: yggdrasil.setlives
+    description: Sets the number of lives you have left.
+    aliases: [sl]
   givelife:
     permission: yggdrasil.givelife
     description: Sets the number of lives you have left.
-    aliases: [sl]
+    aliases: [gl]
   startsession:
     permission: yggdrasil.startsession
     description: Starts the game session.
-    aliases: [s]
   stopsession:
     permission: yggdrasil.stopsession
     description: Stops the game session.
-    aliases: [sg]
   removeboogeyman:
     permission: yggdrasil.removeboogeyman
     description: Removes the boogeyman from the game.
-    aliases: [rbm]
+    aliases: [rebm]
   setboogeyman:
     permission: yggdrasil.setboogeyman
     description: Sets the boogeyman.
     aliases: [sbm]
+  randomizeboogeyman:
+    permission: yggdrasil.randomizeboogeyman
+    description: Randomizes the boogeyman.
+    aliases: [rabm]
   addplayer:
     permission: yggdrasil.addplayer
     description: Adds a player to the game.

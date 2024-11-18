@@ -32,12 +32,12 @@ public class SetBoogeymanCommand implements CommandExecutor {
             }
 
             if (plugin.getPlayerData().get(target.getUniqueId()).isBoogeyman()) {
-                sender.sendMessage(target.name() + " is already a Boogeyman.");
+                sender.sendMessage(target.getName() + " is already a Boogeyman.");
                 return true;
             }
 
             plugin.getPlayerData().get(target.getUniqueId()).setBoogeyman(true);
-            sender.sendMessage(target.name() + " is now a Boogeyman.");
+            sender.sendMessage(target.getName() + " is now a Boogeyman.");
             return true;
         }
         else {

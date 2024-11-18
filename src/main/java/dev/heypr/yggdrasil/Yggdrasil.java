@@ -33,9 +33,11 @@ public final class Yggdrasil extends JavaPlugin {
         registerEvent(new PlayerLeaveListener(this));
 
         registerCommand("givelife", new GiveLifeCommand(this));
+        registerCommand("setlives", new SetLivesCommand(this));
         registerCommand("lives", new LivesCommand(this));
         registerCommand("removeboogeyman", new RemoveBoogeymanCommand(this));
         registerCommand("setboogeyman", new SetBoogeymanCommand(this));
+        registerCommand("randomizeboogeyman", new RandomizeBoogeymanCommand(this));
         registerCommand("startsession", new StartSessionCommand(this));
         registerCommand("stopsession", new StopSessionCommand(this));
         registerCommand("addplayer", new AddPlayerCommand(this));

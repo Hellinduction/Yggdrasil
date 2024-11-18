@@ -9,11 +9,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
-public class GiveLifeCommand implements CommandExecutor {
+public class SetLivesCommand implements CommandExecutor {
 
     private final Yggdrasil plugin;
 
-    public GiveLifeCommand(Yggdrasil plugin) {
+    public SetLivesCommand(Yggdrasil plugin) {
         this.plugin = plugin;
     }
 
@@ -21,7 +21,7 @@ public class GiveLifeCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         if (args.length < 2) {
-            sender.sendMessage("Usage: /givelife <player> <amount>");
+            sender.sendMessage("Usage: /setlives <player> <amount>");
             return true;
         }
 
@@ -43,17 +43,6 @@ public class GiveLifeCommand implements CommandExecutor {
             Player player = (Player) sender;
 
             int targetLives = plugin.getPlayerData().get(target.getUniqueId()).getLives();
-            int playerLives = plugin.getPlayerData().get(player.getUniqueId()).getLives();
-
-            if (playerLives < amount) {
-                sender.sendMessage("You do not have enough lives.");
-                return true;
-            }
-
-            if (playerLives - amount < 2) {
-                sender.sendMessage("You do not have enough lives or would die if you gave that many.");
-                return true;
-            }
 
             if (targetLives + amount > 6) {
                 sender.sendMessage("Player cannot have more than 6 lives.");
@@ -62,6 +51,7 @@ public class GiveLifeCommand implements CommandExecutor {
 
             player.sendMessage("You have given " + amount + " lives to " + target.getName());
             target.sendMessage("You have been given " + amount + " lives");
+
             if (targetLives == 0) {
                 target.sendTitle("You have been revived!", "", 10, 20, 10);
                 target.removePotionEffect(PotionEffectType.MINING_FATIGUE);

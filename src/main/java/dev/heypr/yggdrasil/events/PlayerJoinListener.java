@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,7 +21,7 @@ public class PlayerJoinListener implements Listener {
         this.plugin = plugin;
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings("all")
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -32,7 +33,11 @@ public class PlayerJoinListener implements Listener {
             player.sendTitle(ChatColor.RED + "Game in progress", ChatColor.RED + "You are not part of the game", 10, 70, 20);
             player.sendMessage(ChatColor.GREEN + "Game in progress. Request an admin to add you to the game using /addplayer <player>");
 
-            plugin.getServer().getOperators().forEach(op -> op.getPlayer().sendMessage(ChatColor.DARK_RED + "[URGENT] Player " + player.getName() + " does not have game data. They will be treated as a dead player. Add them to the list of players using /addplayer <player>"));
+            plugin.getServer().getOperators().forEach((op) -> {
+                if (!(op.isOnline())) return;
+                op.getPlayer().sendMessage(ChatColor.DARK_RED + "[URGENT] Player " + player.getName() + " does not have game data. They will be treated as a dead player. Add them to the list of players using /addplayer <player>");
+                return;
+            });
             return;
         }
 
@@ -41,17 +46,26 @@ public class PlayerJoinListener implements Listener {
 
         player.playerListName(player.name().append(lives));
         switch (plugin.getPlayerData().get(player.getUniqueId()).getLives()) {
+            case 5, 6:
+                player.playerListName(player.name().color(TextColor.color(0, 170, 0)).append(lives));
+                break;
+            case 3, 4:
+                player.playerListName(player.name().color(TextColor.color(85, 255, 85)).append(lives));
+                break;
+            case 2:
+                player.playerListName(player.name().color(TextColor.color(255, 255, 85)).append(lives));
+                break;
             case 1:
-                player.playerListName(player.name().color(TextColor.color(255, 0, 0)).append(lives));
+                player.playerListName(player.name().color(TextColor.color(255, 85, 85)).append(lives));
                 break;
             case 0:
-                player.playerListName(player.name().color(TextColor.color(128, 128, 128)).append(lives));
+                player.playerListName(player.name().color(TextColor.color(170, 170, 170)).append(lives));
+
+                player.setGameMode(GameMode.ADVENTURE);
+
                 player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 500));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 500));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 500));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, PotionEffect.INFINITE_DURATION, 500));
-                player.setAllowFlight(true);
-                player.setCollidable(false);
                 break;
         }
     }
