@@ -44,8 +44,9 @@ public class StartSessionCommand implements CommandExecutor {
 
         for (int i = 0; i < numBoogeymen && i < players.size() - 1; i++) {
             Player boogeyman = players.get(i);
+            final int lives = PlayerData.retrieveLivesOrDefault(boogeyman.getUniqueId(), plugin.randomNumber(2, 6));
 
-            playerData.put(boogeyman.getUniqueId(), new PlayerData(boogeyman.getUniqueId(), plugin.randomNumber(2, 6)));
+            playerData.put(boogeyman.getUniqueId(), new PlayerData(boogeyman.getUniqueId(), lives));
             playerData.get(boogeyman.getUniqueId()).setBoogeyman(true);
 
             boogeyman.sendTitle(ChatColor.GRAY + "You will have...", "", 10, 20, 10);
@@ -96,7 +97,8 @@ public class StartSessionCommand implements CommandExecutor {
         }
 
         players.forEach(player -> {
-            playerData.putIfAbsent(player.getUniqueId(), new PlayerData(player.getUniqueId(), plugin.randomNumber(2, 6)));
+            final int lives = PlayerData.retrieveLivesOrDefault(player.getUniqueId(), plugin.randomNumber(2, 6));
+            playerData.putIfAbsent(player.getUniqueId(), new PlayerData(player.getUniqueId(), lives));
             if (!playerData.get(player.getUniqueId()).isBoogeyman()) {
                 player.sendTitle(ChatColor.GRAY + "You will have...", "", 10, 20, 10);
                 new BukkitRunnable() {

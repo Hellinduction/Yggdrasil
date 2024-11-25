@@ -40,7 +40,8 @@ public class AddPlayerCommand implements CommandExecutor {
             return true;
         }
 
-        plugin.getPlayerData().putIfAbsent(target.getUniqueId(), new PlayerData(target.getUniqueId(), plugin.randomNumber(2, 6)));
+        final int lives = PlayerData.retrieveLivesOrDefault(target.getUniqueId(), plugin.randomNumber(2, 6));
+        plugin.getPlayerData().putIfAbsent(target.getUniqueId(), new PlayerData(target.getUniqueId(), lives));
 
         target.sendTitle(ChatColor.GRAY + "You will have...", "", 10, 20, 10);
         new BukkitRunnable() {

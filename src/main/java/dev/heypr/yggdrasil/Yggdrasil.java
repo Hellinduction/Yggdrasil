@@ -60,6 +60,9 @@ public final class Yggdrasil extends JavaPlugin {
                 section.createSection("linked");
         }
 
+        if (!this.config.contains("players"))
+            this.config.createSection("players");
+
         this.saveConfig();
     }
 
@@ -132,7 +135,7 @@ public final class Yggdrasil extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
+        Bot.bot.shutdownNow();
     }
 
     public BukkitScheduler getScheduler() {

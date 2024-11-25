@@ -19,7 +19,6 @@ import java.io.File;
 import java.util.UUID;
 
 public class PlayerData {
-
     private UUID uuid;
     private int lives;
     private boolean isBoogeyman;
@@ -112,7 +111,21 @@ public class PlayerData {
         guild.addRoleToMember(member, role).queue();
     }
 
+    private void saveLives() {
+        final ConfigurationSection section = Yggdrasil.plugin.getConfig().getConfigurationSection("players");
+        ConfigurationSection playerSection;
+
+        if (!section.contains(this.uuid.toString()))
+            playerSection = section.createSection(this.uuid.toString());
+        else
+            playerSection = section.getConfigurationSection(this.uuid.toString());
+
+        playerSection.set("lives", this.lives);
+        Yggdrasil.plugin.saveConfig();
+    }
+
     public void updateColors() {
+        this.saveLives();
         this.updateSkin();
 
         if (Yggdrasil.plugin.getBot() != null)
@@ -129,5 +142,29 @@ public class PlayerData {
 
     public Player getPlayer() {
         return Bukkit.getPlayer(this.uuid);
+    }
+
+    /**
+     * Returns -1 if never stored
+     * @param uuid
+     * @return
+     */
+    public static int retrieveLives(final UUID uuid) {
+        if (!Yggdrasil.plugin.getConfig().contains(String.format("players.%s", uuid.toString())))
+            return -1;
+
+        final ConfigurationSection playerSection = Yggdrasil.plugin.getConfig().getConfigurationSection(String.format("players.%s", uuid));
+        final int lives = playerSection.getInt("lives");
+
+        return lives;
+    }
+
+    public static int retrieveLivesOrDefault(final UUID uuid, final int defaultLives) {
+        final int lives = retrieveLives(uuid);
+
+        if (lives <= -1)
+            return defaultLives;
+
+        return lives;
     }
 }

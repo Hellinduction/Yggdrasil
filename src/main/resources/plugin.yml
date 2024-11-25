@@ -4,7 +4,7 @@ main: dev.heypr.yggdrasil.Yggdrasil
 api-version: '1.20'
 prefix: Yggdrasil
 load: STARTUP
-authors: [ heypr ]
+authors: [ heypr, Hellin ]
 description: One Life gamemode.
 softdepend:
   - PlaceholderAPI

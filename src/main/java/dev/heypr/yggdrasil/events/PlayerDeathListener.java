@@ -28,6 +28,9 @@ public class PlayerDeathListener implements Listener {
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
 
+        if (!plugin.isSessionRunning)
+            return; // No action taken since the session is not running
+
         if (!plugin.getPlayerData().containsKey(player.getUniqueId())) {
             plugin.getServer().getOperators().forEach((op) -> {
                 if (!(op.isOnline())) return;
