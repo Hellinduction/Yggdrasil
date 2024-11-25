@@ -20,6 +20,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -33,6 +34,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public final class SkinsManager {
@@ -65,6 +67,14 @@ public final class SkinsManager {
         public static SkinData deserialize(final Map<String, Object> args) {
             return new SkinData((String) args.get("skinValue"), (String) args.get("skinSignature"));
         }
+
+        @Override
+        public String toString() {
+            return "SkinData{" +
+                    "skinValue='" + skinValue + '\'' +
+                    ", skinSignature='" + skinSignature + '\'' +
+                    '}';
+        }
     }
 
     private JSONObject extractData(final JSONObject obj) {
@@ -73,6 +83,21 @@ public final class SkinsManager {
         final JSONObject data = texture.getJSONObject("data");
 
         return data;
+    }
+
+    /**
+     * Checks whether the skin was already found
+     * @return
+     */
+    private boolean skinFound(final JSONObject obj) {
+        final JSONArray messages = obj.getJSONArray("messages");
+
+        if (messages.isEmpty())
+            return false;
+
+        final JSONObject first = messages.getJSONObject(0);
+
+        return first.getString("code").equals("skin_found");
     }
 
     /**
@@ -97,42 +122,53 @@ public final class SkinsManager {
                 final InputStream inputStream = response.getEntity().getContent();
                 final JSONObject obj = new JSONObject(new JSONTokener(inputStream));
 
-                if (obj.getBoolean("success"))
+                if (this.skinFound(obj))
                     return extractData(obj).toString(4);
 
                 final JSONObject links = obj.getJSONObject("links");
                 final String endpoint = links.getString("job");
 
                 return String.format("https://%s%s", MINESKIN_DOMAIN, endpoint);
+            } catch (final Exception exception) {
+                throw exception;
             }
+        } catch (final Exception exception) {
+            throw exception;
         }
     }
 
-    private void resolveJob(final String jobUrl, final Consumer<JSONObject> callback) {
+    private void resolveJob(final String jobUrl, final BiConsumer<JSONObject, Exception> callback) {
         new BukkitRunnable() {
+            private static final int MAX_FAILS = 10; // It should realistically never take longer than 10 seconds to complete
+
+            private int failCounter = 0;
+
             @Override
             public void run() {
-                try {
-                    try (CloseableHttpClient client = HttpClients.createDefault()) {
-                        HttpGet get = new HttpGet(jobUrl);
+                try (CloseableHttpClient client = HttpClients.createDefault()) {
+                    HttpGet get = new HttpGet(jobUrl);
 
-                        try (CloseableHttpResponse response = client.execute(get)) {
-                            final InputStream inputStream = response.getEntity().getContent();
-                            final JSONObject obj = new JSONObject(new JSONTokener(inputStream));
+                    try (CloseableHttpResponse response = client.execute(get)) {
+                        final InputStream inputStream = response.getEntity().getContent();
+                        final JSONObject obj = new JSONObject(new JSONTokener(inputStream));
 
-                            if (!obj.getBoolean("success"))
-                                return; // Not done yet
+                        if (!obj.getBoolean("success")) {
+                            if (++failCounter > MAX_FAILS) {
+                                super.cancel();
+                                callback.accept(null, new Exception(String.format("Max attempts of %s exceeded", MAX_FAILS)));
+                            }
 
-                            final JSONObject data = extractData(obj);
-
-                            callback.accept(data);
-                            super.cancel();
+                            return; // Not done yet
                         }
+
+                        final JSONObject data = extractData(obj);
+
+                        callback.accept(data, null);
+                        super.cancel();
                     }
                 } catch (final Exception exception) {
-                    exception.printStackTrace();
                     super.cancel();
-                    callback.accept(null);
+                    callback.accept(null, exception);
                 }
             }
         }.runTaskTimerAsynchronously(plugin, 20L, 20L); // Check every 20 seconds until its done
@@ -148,21 +184,27 @@ public final class SkinsManager {
         return skinData;
     }
 
-    private SkinData getSkinData(final File file, final Consumer<SkinData> callback) {
-        if (!file.exists())
-            return null;
+    private void getSkinData(final File file, final BiConsumer<SkinData, Exception> callback) {
+        if (!file.exists()) {
+            callback.accept(null, null);
+            return;
+        }
+
+        Exception ex = null;
 
         try {
             String value = encodeSkinToBase64(file);
 
             final SkinData saved = this.getSavedSkinData(value);
 
-            if (saved != null)
-                return saved;
+            if (saved != null) {
+                callback.accept(saved, null);
+                return;
+            }
 
             new Thread(() -> {
                 try {
-                    final Consumer<JSONObject> apply = dataObj -> {
+                    final BiConsumer<JSONObject, Exception> apply = (dataObj, exception) -> {
                         final String newValue = dataObj.getString("value");
                         final String signature = dataObj.getString("signature");
                         final SkinData data = new SkinData(newValue, signature);
@@ -172,26 +214,26 @@ public final class SkinsManager {
                         section.set(value, data);
                         plugin.saveConfig();
 
-                        callback.accept(data);
+                        callback.accept(data, exception);
                     };
 
                     final String jobUrl = this.uploadSkin(file);
 
                     try {
                         final JSONObject response = new JSONObject(jobUrl);
-                        apply.accept(response);
+                        apply.accept(response, null);
                     } catch (final JSONException ignored) {
                         this.resolveJob(jobUrl, apply);
                     }
-                } catch (final Exception ignored) {
-                    callback.accept(null);
+                } catch (final Exception exception) {
+                    callback.accept(null, exception);
                 }
             }).start();
         } catch (final Exception exception) {
-            exception.printStackTrace();
+            ex = exception;
         }
 
-        return null;
+        callback.accept(null, ex);
     }
 
     private String encodeSkinToBase64(final File skinFile) throws IOException {
@@ -248,19 +290,24 @@ public final class SkinsManager {
 
         craftPlayer.getHandle().connection.send(updatePacket);
 
+        Exception ex = null;
+
         try {
             Method refreshMethod = CraftPlayer.class.getDeclaredMethod("refreshPlayer");
             refreshMethod.setAccessible(true);
             refreshMethod.invoke(craftPlayer);
         } catch (final Exception exception){
-            exception.printStackTrace();
+            ex = exception;
         }
 
         craftPlayer.updateScaledHealth();
         craftPlayer.updateInventory();
+
+        if (ex != null)
+            throw ex;
     }
 
-    private void skinInternal(final Player player, final SkinData skinData) {
+    private void skinInternal(final Player player, final SkinData skinData, final Consumer<Exception> exceptionConsumer) {
         plugin.getScheduler().runTask(plugin, () -> {
             try {
                 this.refreshPlayer(player);
@@ -270,20 +317,31 @@ public final class SkinsManager {
                 this.updateSkinViaPackets(player);
 
                 this.refreshPlayer(player);
+
+                exceptionConsumer.accept(null);
             } catch (final Exception exception) {
-                exception.printStackTrace();
+                exceptionConsumer.accept(exception);
             }
         });
     }
 
     public void skin(final Player player, final File file) {
-        final SkinData skinData = this.getSkinData(file, data -> {
-            if (data != null) {
-                this.skinInternal(player, data);
-            }
-        });
+        this.skin(player, file, null);
+    }
 
-        if (skinData != null)
-            this.skinInternal(player, skinData);
+    public void skin(final Player player, final File file, final Consumer<Exception> exceptionConsumer) {
+        this.getSkinData(file, (data, exception) -> {
+            if (data != null)
+                this.skinInternal(player, data, exception2 -> {
+                    if (exceptionConsumer != null) {
+                        if (exception != null)
+                            exceptionConsumer.accept(exception);
+                        else if (exception2 != null)
+                            exceptionConsumer.accept(exception2);
+                        else
+                            exceptionConsumer.accept(null);
+                    }
+                });
+        });
     }
 }
