@@ -37,7 +37,10 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public final class SkinsManager {
+/**
+ * In order for this not to break chat messages, please set the value `enforce-secure-profile` to `false` in the server.properties
+ */
+public final class SkinManager {
     private static final String MINESKIN_DOMAIN = "api.mineskin.org";
 
     private final Yggdrasil plugin;
@@ -49,7 +52,7 @@ public final class SkinsManager {
         return serverPlayer.getGameProfile();
     }
 
-    public SkinsManager(final Yggdrasil plugin) {
+    public SkinManager(final Yggdrasil plugin) {
         this.plugin = plugin;
     }
 
@@ -205,6 +208,9 @@ public final class SkinsManager {
             new Thread(() -> {
                 try {
                     final BiConsumer<JSONObject, Exception> apply = (dataObj, exception) -> {
+                        if (dataObj == null)
+                            callback.accept(null, exception);
+
                         final String newValue = dataObj.getString("value");
                         final String signature = dataObj.getString("signature");
                         final SkinData data = new SkinData(newValue, signature);

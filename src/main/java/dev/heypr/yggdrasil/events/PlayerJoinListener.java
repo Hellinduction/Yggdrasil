@@ -1,10 +1,7 @@
 package dev.heypr.yggdrasil.events;
 
 import dev.heypr.yggdrasil.Yggdrasil;
-import dev.heypr.yggdrasil.misc.Colors;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import dev.heypr.yggdrasil.misc.ColorManager;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -45,40 +42,21 @@ public class PlayerJoinListener implements Listener {
         }
 
         final int lives = plugin.getPlayerData().get(player.getUniqueId()).getLives();
-        final File skinFile = Colors.getSkinFile(plugin, player, lives);
+        final File skinFile = ColorManager.getSkinFile(plugin, player, lives);
 
         if (skinFile != null)
-            plugin.skinsManager.skin(player, skinFile);
+            plugin.skinManager.skin(player, skinFile);
 
-        player.sendActionBar(Component.text("Lives: " + lives));
-        Component livesComp = Component.text(" (" + plugin.getPlayerData().get(player.getUniqueId()).getLives() + " lives)").decoration(TextDecoration.ITALIC, false).color(TextColor.color(128, 128, 128));
+        ColorManager.setTabListName(plugin, player, plugin.getPlayerData().get(player.getUniqueId()).getLives());
 
-        player.playerListName(player.name().append(livesComp));
+        plugin.getScheduler().runTaskLater(plugin, () -> ColorManager.setTabListName(plugin, player, plugin.getPlayerData().get(player.getUniqueId()).getLives()), 20L); // To fix it incase the skin thing removes it
 
-        plugin.getScheduler().runTaskLater(plugin, () -> player.playerListName(player.name().append(livesComp)), 20L); // To fix it incase the skin thing removes it
+        if (plugin.getPlayerData().get(player.getUniqueId()).getLives() == 0) {
+            player.setGameMode(GameMode.ADVENTURE);
 
-        switch (plugin.getPlayerData().get(player.getUniqueId()).getLives()) {
-            case 5, 6:
-                player.playerListName(player.name().color(TextColor.color(0, 170, 0)).append(livesComp));
-                break;
-            case 3, 4:
-                player.playerListName(player.name().color(TextColor.color(85, 255, 85)).append(livesComp));
-                break;
-            case 2:
-                player.playerListName(player.name().color(TextColor.color(255, 255, 85)).append(livesComp));
-                break;
-            case 1:
-                player.playerListName(player.name().color(TextColor.color(255, 85, 85)).append(livesComp));
-                break;
-            case 0:
-                player.playerListName(player.name().color(TextColor.color(170, 170, 170)).append(livesComp));
-
-                player.setGameMode(GameMode.ADVENTURE);
-
-                player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 500));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 500));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 500));
-                break;
+            player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 500));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 500));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 500));
         }
     }
 }

@@ -1,10 +1,7 @@
 package dev.heypr.yggdrasil.data;
 
 import dev.heypr.yggdrasil.Yggdrasil;
-import dev.heypr.yggdrasil.misc.Colors;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import dev.heypr.yggdrasil.misc.ColorManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -49,16 +46,15 @@ public class PlayerData {
         if (player == null || !player.isOnline())
             return;
 
-        final File skinFile = Colors.getSkinFile(Yggdrasil.plugin, player, this.lives);
+        final File skinFile = ColorManager.getSkinFile(Yggdrasil.plugin, player, this.lives);
 
         if (skinFile == null)
             return;
 
-        Yggdrasil.plugin.skinsManager.skin(player, skinFile);
+        Yggdrasil.plugin.skinManager.skin(player, skinFile);
 
         Yggdrasil.plugin.getScheduler().runTaskLater(Yggdrasil.plugin, () -> { // Set their lives to display again (setting skin messes it up)
-            Component livesComp = Component.text(" (" + this.lives + " lives)").decoration(TextDecoration.ITALIC, false).color(TextColor.color(128, 128, 128));
-            player.playerListName(player.name().append(livesComp));
+            ColorManager.setTabListName(Yggdrasil.plugin, player, this.lives);
         }, 20L);
     }
 

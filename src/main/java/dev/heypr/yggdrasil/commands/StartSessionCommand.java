@@ -2,10 +2,7 @@ package dev.heypr.yggdrasil.commands;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.data.PlayerData;
-import dev.heypr.yggdrasil.misc.Colors;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import dev.heypr.yggdrasil.misc.ColorManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -60,7 +57,7 @@ public class StartSessionCommand implements CommandExecutor {
                 public void run() {
                     if (e > 0) {
                         int lives = plugin.randomNumber(2, 6);
-                        ChatColor color = Colors.getColor(lives);
+                        ChatColor color = ColorManager.getColor(lives);
 
                         boogeyman.sendTitle(color + "" + lives,
                                 "",
@@ -69,26 +66,13 @@ public class StartSessionCommand implements CommandExecutor {
                     }
                     else {
                         int lives = plugin.getPlayerData().get(boogeyman.getUniqueId()).getLives();
-                        ChatColor color = Colors.getColor(lives);
+                        ChatColor color = ColorManager.getColor(lives);
 
                         boogeyman.sendTitle(color + "" + lives + " lives",
                                 "",
                                 10, 20, 10);
 
-                        Component component = Component.text(" (" + plugin.getPlayerData().get(boogeyman.getUniqueId()).getLives() + " lives)").decoration(TextDecoration.ITALIC, false).color(TextColor.color(128, 128, 128));
-                        boogeyman.playerListName(boogeyman.name().append(component));
-
-                        switch (plugin.getPlayerData().get(boogeyman.getUniqueId()).getLives()) {
-                            case 5, 6:
-                                boogeyman.playerListName(boogeyman.name().color(TextColor.color(0, 170, 0)).append(component));
-                                break;
-                            case 3, 4:
-                                boogeyman.playerListName(boogeyman.name().color(TextColor.color(85, 255, 85)).append(component));
-                                break;
-                            case 2:
-                                boogeyman.playerListName(boogeyman.name().color(TextColor.color(255, 255, 85)).append(component));
-                                break;
-                        }
+                        ColorManager.setTabListName(plugin, boogeyman, plugin.getPlayerData().get(boogeyman.getUniqueId()).getLives());
                         cancel();
                     }
                 }
@@ -123,7 +107,7 @@ public class StartSessionCommand implements CommandExecutor {
                     public void run() {
                         if (e > 0) {
                             int lives = plugin.randomNumber(2, 6);
-                            ChatColor color = Colors.getColor(lives);
+                            ChatColor color = ColorManager.getColor(lives);
 
                             player.sendTitle(color + "" + lives,
                                     "",
@@ -132,26 +116,13 @@ public class StartSessionCommand implements CommandExecutor {
                         }
                         else {
                             int lives = plugin.getPlayerData().get(player.getUniqueId()).getLives();
-                            ChatColor color = Colors.getColor(lives);
+                            ChatColor color = ColorManager.getColor(lives);
 
                             player.sendTitle(color + "" + lives + " lives",
                                     "",
                                     10, 20, 10);
 
-                            Component component = Component.text(" (" + plugin.getPlayerData().get(player.getUniqueId()).getLives() + " lives)").decoration(TextDecoration.ITALIC, false).color(TextColor.color(128, 128, 128));
-                            player.playerListName(player.name().append(component));
-
-                            switch (plugin.getPlayerData().get(player.getUniqueId()).getLives()) {
-                                case 5, 6:
-                                    player.playerListName(player.name().color(TextColor.color(0, 170, 0)).append(component));
-                                    break;
-                                case 3, 4:
-                                    player.playerListName(player.name().color(TextColor.color(85, 255, 85)).append(component));
-                                    break;
-                                case 2:
-                                    player.playerListName(player.name().color(TextColor.color(255, 255, 85)).append(component));
-                                    break;
-                            }
+                            ColorManager.setTabListName(plugin, player, plugin.getPlayerData().get(player.getUniqueId()).getLives());
                             cancel();
                         }
                     }

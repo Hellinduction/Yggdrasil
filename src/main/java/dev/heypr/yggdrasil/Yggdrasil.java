@@ -5,7 +5,7 @@ import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.events.PlayerDeathListener;
 import dev.heypr.yggdrasil.events.PlayerJoinListener;
 import dev.heypr.yggdrasil.events.PlayerLeaveListener;
-import dev.heypr.yggdrasil.misc.SkinsManager;
+import dev.heypr.yggdrasil.misc.SkinManager;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -31,7 +31,7 @@ public final class Yggdrasil extends JavaPlugin {
     public boolean isSessionRunning = false;
     public boolean isGameRunning = false;
 
-    public SkinsManager skinsManager;
+    public SkinManager skinManager;
     private FileConfiguration config;
 
     private void initConfig() {
@@ -52,11 +52,11 @@ public final class Yggdrasil extends JavaPlugin {
     public void onEnable() {
         plugin = this;
 
-        ConfigurationSerialization.registerClass(SkinsManager.SkinData.class);
+        ConfigurationSerialization.registerClass(SkinManager.SkinData.class);
 
         this.initConfig();
 
-        this.skinsManager = new SkinsManager(this);
+        this.skinManager = new SkinManager(this);
 
         registerEvent(new PlayerJoinListener(this));
         registerEvent(new PlayerDeathListener(this));
