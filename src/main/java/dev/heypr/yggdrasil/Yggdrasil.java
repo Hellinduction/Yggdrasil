@@ -2,10 +2,12 @@ package dev.heypr.yggdrasil;
 
 import dev.heypr.yggdrasil.commands.*;
 import dev.heypr.yggdrasil.data.PlayerData;
+import dev.heypr.yggdrasil.events.PlayerChatListener;
 import dev.heypr.yggdrasil.events.PlayerDeathListener;
 import dev.heypr.yggdrasil.events.PlayerJoinListener;
 import dev.heypr.yggdrasil.events.PlayerLeaveListener;
 import dev.heypr.yggdrasil.misc.SkinManager;
+import dev.heypr.yggdrasil.misc.discord.Bot;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -33,6 +35,7 @@ public final class Yggdrasil extends JavaPlugin {
 
     public SkinManager skinManager;
     private FileConfiguration config;
+    private Bot bot;
 
     private void initConfig() {
         this.saveDefaultConfig();
@@ -46,6 +49,18 @@ public final class Yggdrasil extends JavaPlugin {
             if (!section.contains("stored"))
                 section.createSection("stored");
         }
+
+        if (!this.config.contains("discord")) {
+            section = this.config.createSection("discord");
+
+            if (!section.contains("guilds"))
+                section.createSection("guilds");
+
+            if (!section.contains("linked"))
+                section.createSection("linked");
+        }
+
+        this.saveConfig();
     }
 
     @Override
@@ -61,6 +76,7 @@ public final class Yggdrasil extends JavaPlugin {
         registerEvent(new PlayerJoinListener(this));
         registerEvent(new PlayerDeathListener(this));
         registerEvent(new PlayerLeaveListener(this));
+        registerEvent(new PlayerChatListener(this));
 
         registerCommand("givelife", new GiveLifeCommand(this));
         registerCommand("setlives", new SetLivesCommand(this));
@@ -72,8 +88,24 @@ public final class Yggdrasil extends JavaPlugin {
         registerCommand("stopsession", new StopSessionCommand(this));
         registerCommand("addplayer", new AddPlayerCommand(this));
         registerCommand("skin", new SkinCommand(this));
+        registerCommand("setdiscordtoken", new SetDiscordTokenCommand(this));
 
         this.initPlaceholders();
+        this.loadBot();
+    }
+
+    public void loadBot() {
+        final ConfigurationSection section = this.getConfig().getConfigurationSection("discord");
+
+        if (!section.contains("token"))
+            return;
+
+        final String token = section.getString("token");
+        this.bot = new Bot(this, token);
+    }
+
+    public Bot getBot() {
+        return this.bot;
     }
 
     @Override

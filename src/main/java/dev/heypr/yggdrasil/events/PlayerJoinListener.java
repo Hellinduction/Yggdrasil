@@ -1,6 +1,7 @@
 package dev.heypr.yggdrasil.events;
 
 import dev.heypr.yggdrasil.Yggdrasil;
+import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.misc.ColorManager;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -10,8 +11,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import java.io.File;
 
 public class PlayerJoinListener implements Listener {
 
@@ -41,11 +40,9 @@ public class PlayerJoinListener implements Listener {
             return;
         }
 
-        final int lives = plugin.getPlayerData().get(player.getUniqueId()).getLives();
-        final File skinFile = ColorManager.getSkinFile(plugin, player, lives);
+        final PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
 
-        if (skinFile != null)
-            plugin.skinManager.skin(player, skinFile);
+        playerData.updateColors();
 
         ColorManager.setTabListName(plugin, player, plugin.getPlayerData().get(player.getUniqueId()).getLives());
 

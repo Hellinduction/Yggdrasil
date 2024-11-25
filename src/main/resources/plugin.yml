@@ -46,3 +46,7 @@ commands:
   skin:
     permission: yggdrasil.skin
     description: Set your skin to a skin from the file system
+  setdiscordtoken:
+    permission: yggdrasil.setdiscordtoken
+    description: Sets the token for the discord bot
+    aliases: [token]

@@ -2,7 +2,17 @@ package dev.heypr.yggdrasil.data;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.misc.ColorManager;
+import dev.heypr.yggdrasil.misc.discord.Bot;
+import dev.heypr.yggdrasil.misc.discord.BotUtils;
+import dev.heypr.yggdrasil.misc.discord.command.CommandManager;
+import dev.heypr.yggdrasil.misc.discord.command.impl.LinkCommand;
+import dev.heypr.yggdrasil.misc.discord.listeners.EventListener;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -19,7 +29,7 @@ public class PlayerData {
         this.lives = lives;
         this.isBoogeyman = false;
 
-        this.updateSkin();
+        this.updateColors();
     }
 
     public UUID getUuid() {
@@ -32,12 +42,12 @@ public class PlayerData {
 
     public void addLives(int amount) {
         this.lives += amount;
-        this.updateSkin();
+        this.updateColors();
     }
 
     public void decreaseLives(int amount) {
         this.lives -= amount;
-        this.updateSkin();
+        this.updateColors();
     }
 
     private void updateSkin() {
@@ -56,6 +66,59 @@ public class PlayerData {
         Yggdrasil.plugin.getScheduler().runTaskLater(Yggdrasil.plugin, () -> { // Set their lives to display again (setting skin messes it up)
             ColorManager.setTabListName(Yggdrasil.plugin, player, this.lives);
         }, 20L);
+    }
+
+    private void removeOtherColorRoles(final Guild guild, final Member member, final ColorManager.Colors exclude) {
+        for (final ColorManager.Colors colors : ColorManager.Colors.values()) {
+            if (colors == exclude)
+                continue;
+
+            final String roleName = colors.name().toLowerCase();
+            final Role role = guild.getRolesByName(roleName, false).get(0);
+
+            System.out.println(role.getName());
+
+            if (role == null)
+                continue;
+
+            if (!BotUtils.hasRole(member, roleName))
+                continue;
+
+            guild.removeRoleFromMember(member, role).queue();
+        }
+    }
+
+    private void updateDiscordColor() {
+        final ColorManager.Colors colors = ColorManager.Colors.from(this.lives);
+        final String roleName = colors.name().toLowerCase();
+        final LinkCommand command = CommandManager.getCommand("link");
+        final ConfigurationSection section = command.getUserSection(this.uuid);
+
+        if (section == null)
+            return;
+
+        final String discordId = section.getName();
+        final User user = Bot.bot.getUserById(discordId);
+        final Guild guild = EventListener.guild;
+        final Member member = guild.getMember(user);
+        final Role role = guild.getRolesByName(roleName, false).get(0);
+
+        if (role == null)
+            return;
+
+        if (BotUtils.hasRole(member, roleName))
+            return;
+
+        this.removeOtherColorRoles(guild, member, colors);
+
+        guild.addRoleToMember(member, role).queue();
+    }
+
+    public void updateColors() {
+        this.updateSkin();
+
+        if (Yggdrasil.plugin.getBot() != null)
+            this.updateDiscordColor();
     }
 
     public boolean isBoogeyman() {

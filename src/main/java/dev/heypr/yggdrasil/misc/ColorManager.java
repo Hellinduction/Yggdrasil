@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.awt.*;
 import java.io.File;
 import java.util.UUID;
 
@@ -26,6 +27,10 @@ public final class ColorManager {
 
         public TextColor getRgb() {
             return this.rgb;
+        }
+
+        public Color getColor() {
+            return new Color(this.rgb.red(), this.rgb.green(), this.rgb.blue());
         }
 
         public static Colors from(final int lives) {

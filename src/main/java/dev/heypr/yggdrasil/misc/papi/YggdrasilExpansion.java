@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class YggdrasilExpansion extends PlaceholderExpansion {
     private final Yggdrasil plugin;
-    private final Map<String, Placeholder> placeholdersMap = new HashMap<>();
+    private final Map<String, IPlaceholder> placeholdersMap = new HashMap<>();
 
     public YggdrasilExpansion(final Yggdrasil plugin) {
         this.plugin = plugin;
@@ -22,7 +22,7 @@ public class YggdrasilExpansion extends PlaceholderExpansion {
         this.registerPlaceholders();
     }
 
-    private void registerPlaceholder(final String name, final Placeholder placeholder) {
+    private void registerPlaceholder(final String name, final IPlaceholder placeholder) {
         this.placeholdersMap.put(name.toLowerCase(), placeholder);
     }
 
@@ -31,9 +31,9 @@ public class YggdrasilExpansion extends PlaceholderExpansion {
         this.registerPlaceholder("is_boogie_man", new BoogieManPlaceholder());
     }
 
-    private Placeholder getPlaceholder(final String placeholderStr) {
+    private IPlaceholder getPlaceholder(final String placeholderStr) {
         final String placeholderLower = placeholderStr.toLowerCase();
-        final Map.Entry<String, Placeholder> placeholderEntry = this.placeholdersMap.entrySet().stream()
+        final Map.Entry<String, IPlaceholder> placeholderEntry = this.placeholdersMap.entrySet().stream()
                 .filter(entry -> placeholderLower.startsWith(entry.getKey()))
                 .findFirst()
                 .orElse(null);
@@ -74,7 +74,7 @@ public class YggdrasilExpansion extends PlaceholderExpansion {
 
         Player player = offlinePlayer.getPlayer();
         PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
-        Placeholder placeholder = getPlaceholder(placeholderStr);
+        IPlaceholder placeholder = getPlaceholder(placeholderStr);
 
         if (playerData == null)
             return placeholder.nullPlayerData(); // Likely the session has not started yet
