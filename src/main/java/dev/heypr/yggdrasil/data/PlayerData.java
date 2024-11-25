@@ -76,8 +76,6 @@ public class PlayerData {
             final String roleName = colors.name().toLowerCase();
             final Role role = guild.getRolesByName(roleName, false).get(0);
 
-            System.out.println(role.getName());
-
             if (role == null)
                 continue;
 
