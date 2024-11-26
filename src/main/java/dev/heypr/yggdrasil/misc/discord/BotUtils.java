@@ -14,8 +14,6 @@ import java.awt.*;
 import java.util.function.Consumer;
 
 public final class BotUtils {
-    public static boolean isCurrentlyNuking = false;
-
     public static void sendEmbed(final TextChannel channel, final EmbedBuilder builder) {
         BotUtils.sendEmbed(channel, builder, null);
     }
