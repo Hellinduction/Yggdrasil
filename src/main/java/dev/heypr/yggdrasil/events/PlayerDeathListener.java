@@ -5,13 +5,10 @@ import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.misc.ColorManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.UUID;
 
@@ -47,13 +44,5 @@ public class PlayerDeathListener implements Listener {
         player.sendActionBar(Component.text("Lives: " + data.getLives()));
 
         ColorManager.setTabListName(plugin, player, data.getLives());
-
-        if (data.getLives() == 0) {
-            player.setGameMode(GameMode.ADVENTURE);
-
-            player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 500));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 500));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 500));
-        }
     }
 }

@@ -4,13 +4,10 @@ import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.misc.ColorManager;
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 public class PlayerJoinListener implements Listener {
 
@@ -42,18 +39,10 @@ public class PlayerJoinListener implements Listener {
 
         final PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
 
-        playerData.updateColors();
+        playerData.update();
 
         ColorManager.setTabListName(plugin, player, plugin.getPlayerData().get(player.getUniqueId()).getLives());
 
         plugin.getScheduler().runTaskLater(plugin, () -> ColorManager.setTabListName(plugin, player, plugin.getPlayerData().get(player.getUniqueId()).getLives()), 20L); // To fix it incase the skin thing removes it
-
-        if (plugin.getPlayerData().get(player.getUniqueId()).getLives() == 0) {
-            player.setGameMode(GameMode.ADVENTURE);
-
-            player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 500));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 500));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 500));
-        }
     }
 }

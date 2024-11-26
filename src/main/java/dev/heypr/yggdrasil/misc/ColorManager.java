@@ -53,6 +53,10 @@ public final class ColorManager {
 
     public static ChatColor getColor(int lives) {
         switch (lives) {
+            case 0:
+                return ChatColor.GRAY;
+            case 1:
+                return ChatColor.RED;
             case 2:
                 return ChatColor.YELLOW;
             case 4, 3:

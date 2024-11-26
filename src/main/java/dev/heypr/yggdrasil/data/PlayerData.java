@@ -12,8 +12,11 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.io.File;
 import java.util.UUID;
@@ -28,7 +31,36 @@ public class PlayerData {
         this.lives = lives;
         this.isBoogeyman = false;
 
-        this.updateColors();
+        this.update();
+    }
+
+    public void checkDead() {
+        final Player player = this.getPlayer();
+
+        if (player == null || !player.isOnline())
+            return;
+
+        if (this.lives != 0)
+            return;
+
+        player.setGameMode(GameMode.ADVENTURE);
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 500));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 500));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 500));
+    }
+
+    public void revive() {
+        final Player player = this.getPlayer();
+
+        if (player == null || !player.isOnline())
+            return;
+
+        player.sendTitle("You have been revived!", "", 10, 20, 10);
+        player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
+        player.removePotionEffect(PotionEffectType.WEAKNESS);
+        player.removePotionEffect(PotionEffectType.RESISTANCE);
+        player.setGameMode(GameMode.SURVIVAL);
     }
 
     public UUID getUuid() {
@@ -41,17 +73,17 @@ public class PlayerData {
 
     public void setLives(int amount) {
         this.lives = amount;
-        this.updateColors();
+        this.update();
     }
 
     public void addLives(int amount) {
         this.lives += amount;
-        this.updateColors();
+        this.update();
     }
 
     public void decreaseLives(int amount) {
         this.lives -= amount;
-        this.updateColors();
+        this.update();
     }
 
     private void updateSkin() {
@@ -129,9 +161,13 @@ public class PlayerData {
         Yggdrasil.plugin.saveConfig();
     }
 
-    public void updateColors() {
+    /**
+     * Updates some stuff based on the PlayerData state
+     */
+    public void update() {
         this.saveLives();
         this.updateSkin();
+        this.checkDead();
 
         if (Yggdrasil.plugin.getBot() != null)
             this.updateDiscordColor();
