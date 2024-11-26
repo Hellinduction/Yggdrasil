@@ -39,6 +39,11 @@ public class PlayerData {
         return lives;
     }
 
+    public void setLives(int amount) {
+        this.lives = amount;
+        this.updateColors();
+    }
+
     public void addLives(int amount) {
         this.lives += amount;
         this.updateColors();

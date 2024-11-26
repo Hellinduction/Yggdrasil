@@ -9,6 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * The player command for giving another player one of your lives
+ */
 public class GiveLifeCommand implements CommandExecutor {
 
     private final Yggdrasil plugin;
@@ -42,6 +45,11 @@ public class GiveLifeCommand implements CommandExecutor {
 
             Player player = (Player) sender;
 
+            if (target.equals(player)) {
+                sender.sendMessage("You cannot give yourself lives. If you are an admin please use /addlives instead.");
+                return true;
+            }
+
             int targetLives = plugin.getPlayerData().get(target.getUniqueId()).getLives();
             int playerLives = plugin.getPlayerData().get(player.getUniqueId()).getLives();
 
@@ -55,13 +63,14 @@ public class GiveLifeCommand implements CommandExecutor {
                 return true;
             }
 
-            if (targetLives + amount > 6) {
-                sender.sendMessage("Player cannot have more than 6 lives.");
+            if (targetLives + amount > Yggdrasil.MAX_LIVES) {
+                sender.sendMessage(String.format("Player cannot have more than %s lives.", Yggdrasil.MAX_LIVES));
                 return true;
             }
 
             player.sendMessage("You have given " + amount + " lives to " + target.getName());
             target.sendMessage("You have been given " + amount + " lives");
+
             if (targetLives == 0) {
                 target.sendTitle("You have been revived!", "", 10, 20, 10);
                 target.removePotionEffect(PotionEffectType.MINING_FATIGUE);
@@ -69,6 +78,8 @@ public class GiveLifeCommand implements CommandExecutor {
                 target.removePotionEffect(PotionEffectType.RESISTANCE);
                 target.setGameMode(GameMode.SURVIVAL);
             }
+
+            plugin.getPlayerData().get(player.getUniqueId()).decreaseLives(amount);
             plugin.getPlayerData().get(target.getUniqueId()).addLives(amount);
             return true;
         }

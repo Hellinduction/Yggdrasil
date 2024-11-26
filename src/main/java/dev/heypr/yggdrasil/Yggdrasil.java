@@ -26,12 +26,13 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public final class Yggdrasil extends JavaPlugin {
+    public static final int MAX_LIVES = 6;
+
     public static Yggdrasil plugin;
 
     Map<UUID, PlayerData> playerData = new HashMap<>();
     List<Player> deadPlayers = new ArrayList<>();
     public boolean isSessionRunning = false;
-    public boolean isGameRunning = false;
 
     public SkinManager skinManager;
     private FileConfiguration config;
@@ -82,7 +83,7 @@ public final class Yggdrasil extends JavaPlugin {
         registerEvent(new PlayerChatListener(this));
 
         registerCommand("givelife", new GiveLifeCommand(this));
-        registerCommand("setlives", new SetLivesCommand(this));
+        registerCommand("addlives", new AddLivesCommand(this));
         registerCommand("lives", new LivesCommand(this));
         registerCommand("removeboogeyman", new RemoveBoogeymanCommand(this));
         registerCommand("setboogeyman", new SetBoogeymanCommand(this));

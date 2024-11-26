@@ -9,10 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class RandomizeBoogeymanCommand implements CommandExecutor {
 
@@ -28,6 +25,13 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
         List<Player> players = new ArrayList<>(plugin.getServer().getOnlinePlayers());
         Map<UUID, PlayerData> playerData = plugin.getPlayerData();
 
+        Collections.shuffle(players);
+
+        if (!Yggdrasil.plugin.isSessionRunning) {
+            sender.sendMessage("A session must be in progress in order to randomize the boogie man.");
+            return true;
+        }
+
         if (players.isEmpty()) return true;
 
         for (final PlayerData data : playerData.values())
@@ -35,7 +39,7 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
 
         int numBoogeymen = plugin.randomNumber(1, 3);
 
-        for (int i = 0; i < numBoogeymen && i < players.size() - 1; i++) {
+        for (int i = 0; i < numBoogeymen && i < players.size(); i++) {
             Player boogeyman = players.get(i);
             final int lives = PlayerData.retrieveLivesOrDefault(boogeyman.getUniqueId(), plugin.randomNumber(2, 6));
             playerData.putIfAbsent(boogeyman.getUniqueId(), new PlayerData(boogeyman.getUniqueId(), lives));
