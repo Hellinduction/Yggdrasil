@@ -48,10 +48,10 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
         }
 
         int numBoogeymen = plugin.randomNumber(1, 3);
-        List<Player> potentialBoogyMen = plugin.getBoogieManPool();
+        List<Player> potentialBoogeyMen = plugin.getBoogieManPool();
 
-        for (int i = 0; i < numBoogeymen && i < potentialBoogyMen.size() - 1; i++) {
-            final Player boogeyman = potentialBoogyMen.get(i);
+        for (int i = 0; i < numBoogeymen && i < potentialBoogeyMen.size() - 1; i++) {
+            final Player boogeyman = potentialBoogeyMen.get(i);
             final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(boogeyman.getUniqueId(), plugin.randomNumber(2, 6));
             final PlayerData data = new PlayerData(boogeyman.getUniqueId(), pair.getKey());
 
@@ -78,7 +78,9 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
             }, 260L);
         }
 
-        final List<Player> playerPool = players;
+        final List<Player> playerPool = players.stream()
+                .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) == 0)
+                .collect(Collectors.toList());
 
         sender.sendMessage(ChatColor.GREEN + "The session is starting...");
 

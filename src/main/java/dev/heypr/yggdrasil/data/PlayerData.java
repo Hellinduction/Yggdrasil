@@ -208,6 +208,13 @@ public class PlayerData {
 
     public void setBoogeyman(boolean boogeyman) {
         this.isBoogeyman = boogeyman;
+
+        final Player player = this.getPlayer();
+
+        if (player != null && player.isOnline()) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou are the &6&lBoogeyman&4&l!!!"));
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&lRemember, as the &6&lBoogeyman&7&l your goal is to kill 1 player during this session."));
+        }
     }
 
     public boolean hasLastChance() {
