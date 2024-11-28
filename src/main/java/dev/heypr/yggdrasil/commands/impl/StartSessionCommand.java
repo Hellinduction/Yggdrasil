@@ -81,9 +81,7 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
             }, 260L);
         }
 
-        final List<Player> playerPool = players.stream()
-                .filter(player -> plugin.isCullingSession || PlayerData.retrieveLives(player.getUniqueId()) != 0)
-                .collect(Collectors.toList());
+        final List<Player> playerPool = players;
 
         sender.sendMessage(ChatColor.GREEN + "The session is starting...");
 
@@ -101,21 +99,25 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
                 data.checkDead();
                 data.displayLives(pair.getValue());
 
-                plugin.getScheduler().runTaskLater(plugin, () -> {
-                    player.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
+                final boolean showTitle = plugin.isCullingSession || PlayerData.retrieveLives(player.getUniqueId()) != 0;
+
+                if (showTitle) {
                     plugin.getScheduler().runTaskLater(plugin, () -> {
-                        player.sendTitle(ChatColor.YELLOW + "2", "", 10, 20, 10);
+                        player.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
                         plugin.getScheduler().runTaskLater(plugin, () -> {
-                            player.sendTitle(ChatColor.RED + "1", "", 10, 20, 10);
+                            player.sendTitle(ChatColor.YELLOW + "2", "", 10, 20, 10);
                             plugin.getScheduler().runTaskLater(plugin, () -> {
-                                player.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
+                                player.sendTitle(ChatColor.RED + "1", "", 10, 20, 10);
                                 plugin.getScheduler().runTaskLater(plugin, () -> {
-                                    player.sendTitle(ChatColor.GREEN + "NOT THE BOOGEYMAN!", "", 10, 70, 20);
-                                }, 60L);
+                                    player.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
+                                    plugin.getScheduler().runTaskLater(plugin, () -> {
+                                        player.sendTitle(ChatColor.GREEN + "NOT THE BOOGEYMAN!", "", 10, 70, 20);
+                                    }, 60L);
+                                }, 20L);
                             }, 20L);
                         }, 20L);
-                    }, 20L);
-                }, 260L);
+                    }, 260L);
+                }
             }
         });
 
