@@ -79,7 +79,7 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
         }
 
         final List<Player> playerPool = players.stream()
-                .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) == 0)
+                .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) != 0)
                 .collect(Collectors.toList());
 
         sender.sendMessage(ChatColor.GREEN + "The session is starting...");
