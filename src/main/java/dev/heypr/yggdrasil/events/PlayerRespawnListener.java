@@ -5,6 +5,7 @@ import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.data.PlayerData;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,6 +26,8 @@ public class PlayerRespawnListener implements Listener {
         Player player = event.getPlayer();
 
         if (!plugin.getPlayerData().containsKey(player.getUniqueId())) {
+            player.setGameMode(GameMode.ADVENTURE);
+
             plugin.getServer().getOperators().forEach((op) -> {
                 if (!(op.isOnline())) return;
                 op.getPlayer().sendMessage(ChatColor.DARK_RED + "[URGENT] Player " + player.getName() + " does not have game data. They will be treated as a dead player. Add them to the list of players using /addplayer <player>");

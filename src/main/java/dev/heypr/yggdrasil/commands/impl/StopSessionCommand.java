@@ -5,11 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 public class StopSessionCommand implements CommandExecutor {
 
@@ -27,6 +23,8 @@ public class StopSessionCommand implements CommandExecutor {
             return true;
         }
 
+        sender.sendMessage(ChatColor.GREEN + "The session is stopping...");
+
 //        plugin.getDeadPlayers().forEach(player -> {
 //            player.ban("Banned for dying.", new Date().toInstant().plus(30, ChronoUnit.DAYS),null, true);
 //            plugin.getDeadPlayers().remove(player);
@@ -35,6 +33,13 @@ public class StopSessionCommand implements CommandExecutor {
         plugin.getPlayerData().forEach((uuid, playerData) -> {
             if (playerData.isBoogeyman()) {
                 playerData.setBoogeyman(false);
+            }
+
+            playerData.checkGraduate();
+
+            if (playerData.hasLastChance()) {
+                playerData.setLastChance(false);
+                playerData.checkDead();
             }
 //            Player player = plugin.getServer().getPlayer(uuid);
 

@@ -42,4 +42,12 @@ public final class CommandWrapper implements CommandExecutor {
 
         return false;
     }
+
+    public CommandExecutor getExecutor() {
+        return this.executor;
+    }
+
+    public boolean isRequireActiveSession() {
+        return this.requireActiveSession;
+    }
 }

@@ -51,8 +51,13 @@ public class GiveLifeCommand implements CommandExecutor {
                 return true;
             }
 
-            int targetLives = plugin.getPlayerData().get(target.getUniqueId()).getLives();
             int playerLives = plugin.getPlayerData().get(player.getUniqueId()).getLives();
+            int targetLives = plugin.getPlayerData().get(target.getUniqueId()).getLives();
+
+            if (targetLives == 0) {
+                sender.sendMessage(ChatColor.RED + "You cannot revive dead players.");
+                return true;
+            }
 
             if (playerLives < amount) {
                 sender.sendMessage(ChatColor.RED + "You do not have enough lives.");
@@ -75,10 +80,10 @@ public class GiveLifeCommand implements CommandExecutor {
             target.sendMessage(ChatColor.GREEN + "You have been given " + color + amount + ChatColor.GREEN + " lives");
 
             final PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
-            final PlayerData targetData = plugin.getPlayerData().get(player.getUniqueId());
+            final PlayerData targetData = plugin.getPlayerData().get(target.getUniqueId());
 
-            if (targetLives == 0)
-                targetData.revive();
+//            if (targetLives == 0)
+//                targetData.revive();
 
             playerData.decreaseLives(amount);
             playerData.checkDead();

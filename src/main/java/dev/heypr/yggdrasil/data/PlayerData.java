@@ -7,6 +7,7 @@ import dev.heypr.yggdrasil.misc.discord.BotUtils;
 import dev.heypr.yggdrasil.misc.discord.command.CommandManager;
 import dev.heypr.yggdrasil.misc.discord.command.impl.LinkCommand;
 import dev.heypr.yggdrasil.misc.discord.listeners.EventListener;
+import dev.heypr.yggdrasil.misc.object.Pair;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -16,21 +17,25 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.util.UUID;
 
 public class PlayerData {
     private UUID uuid;
-    private int lives;
+    private int lives; // Persistent
     private boolean isBoogeyman;
+    private boolean lastChance;
+    private int kills;
 
     public PlayerData(UUID uuid, int lives) {
         this.uuid = uuid;
         this.lives = lives;
         this.isBoogeyman = false;
+        this.lastChance = false;
+        this.kills = 0;
 
         this.update(-1);
     }
@@ -41,14 +46,16 @@ public class PlayerData {
         if (player == null || !player.isOnline())
             return;
 
-        if (this.lives != 0)
+        if (this.lives != 0 || this.lastChance)
             return;
 
-        player.setGameMode(GameMode.ADVENTURE);
+        player.setGameMode(GameMode.SPECTATOR);
 
-        player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 500));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 500));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 500));
+//        player.setGameMode(GameMode.ADVENTURE);
+//
+//        player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 500));
+//        player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 500));
+//        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 500));
     }
 
     public void revive() {
@@ -102,7 +109,7 @@ public class PlayerData {
         if (player == null)
             return;
 
-        ColorManager.setTabListName(Yggdrasil.plugin, player, this.lives);
+        ColorManager.setTabListName(player, this);
     }
 
     private void updateSkin() {
@@ -111,16 +118,14 @@ public class PlayerData {
         if (player == null || !player.isOnline())
             return;
 
-        final File skinFile = ColorManager.getSkinFile(Yggdrasil.plugin, player, this.lives);
+        final File skinFile = ColorManager.getSkinFile(Yggdrasil.plugin, player, this);
 
         if (skinFile == null)
             return;
 
-        Yggdrasil.plugin.skinManager.skin(player, skinFile);
-
-        Yggdrasil.plugin.getScheduler().runTaskLater(Yggdrasil.plugin, () -> { // Set their lives to display again (setting skin messes it up)
-            ColorManager.setTabListName(Yggdrasil.plugin, player, this.lives);
-        }, 20L);
+        Yggdrasil.plugin.skinManager.skin(player, skinFile, success -> Yggdrasil.plugin.getScheduler().runTaskLater(Yggdrasil.plugin, () -> {
+            ColorManager.setTabListName(player, this); // Set their lives to display again (setting skin messes it up)
+        }, 20L));
     }
 
     private void removeOtherColorRoles(final Guild guild, final Member member, final ColorManager.Colors exclude) {
@@ -190,6 +195,9 @@ public class PlayerData {
         this.saveLives();
         this.updateSkin();
 
+        if (this.lives > 0 && this.lastChance)
+            this.lastChance = false;
+
         if (Yggdrasil.plugin.getBot() != null)
             this.updateDiscordColor();
     }
@@ -202,8 +210,73 @@ public class PlayerData {
         this.isBoogeyman = boogeyman;
     }
 
+    public boolean hasLastChance() {
+        return this.lastChance;
+    }
+
+    public void setLastChance(final boolean lastChance) {
+        this.lastChance = lastChance;
+    }
+
+    public int getKills() {
+        return this.kills;
+    }
+
+    public void incrementKills() {
+        ++this.kills;
+    }
+
+    public void checkGraduate() {
+        if (Yggdrasil.plugin.isCullingSession && this.lastChance && this.kills >= 3 && this.lives == 0) {
+            this.addLives(1);
+
+            final Player player = this.getPlayer();
+
+            if (player != null && player.isOnline()) {
+                player.sendMessage(ChatColor.GREEN + "You successfully got 3 killed, you have regained a life!");
+                player.setGameMode(GameMode.SPECTATOR);
+            }
+        }
+    }
+
     public Player getPlayer() {
         return Bukkit.getPlayer(this.uuid);
+    }
+
+    public void displayLives(final boolean randomizer) {
+        final Player player = this.getPlayer();
+        final Yggdrasil plugin = Yggdrasil.plugin;
+
+        if (player == null)
+            return;
+
+        player.sendTitle(ChatColor.GRAY + "You will have...", "", 10, 20, 10);
+
+        new BukkitRunnable() {
+            int e = randomizer ? 5 : 0;
+
+            @Override
+            public void run() {
+                if (e > 0) {
+                    int lives = plugin.randomNumber(2, 6);
+                    ChatColor color = ColorManager.getColor(lives);
+
+                    player.sendTitle(color + "" + lives,
+                            "",
+                            10, 20, 10);
+                    e--;
+                } else {
+                    ChatColor color = ColorManager.getColor(lives);
+
+                    player.sendTitle(color + "" + lives + " lives",
+                            "",
+                            10, 20, 10);
+
+                    ColorManager.setTabListName(player, plugin.getPlayerData().get(player.getUniqueId()));
+                    cancel();
+                }
+            }
+        }.runTaskTimer(plugin, 40L, 5L);
     }
 
     /**
@@ -221,12 +294,22 @@ public class PlayerData {
         return lives;
     }
 
-    public static int retrieveLivesOrDefault(final UUID uuid, final int defaultLives) {
+    /**
+     * Returns a Pair with the Integer being the number of lives and the Boolean being whether it used the provided defaultLives
+     * @param uuid
+     * @param defaultLives
+     * @return
+     */
+    public static Pair<Integer, Boolean> retrieveLivesOrDefaultAsPair(final UUID uuid, final int defaultLives) {
         final int lives = retrieveLives(uuid);
 
         if (lives <= -1)
-            return defaultLives;
+            return new Pair<>(defaultLives, true);
 
-        return lives;
+        return new Pair<>(lives, false);
+    }
+
+    public static int retrieveLivesOrDefault(final UUID uuid, final int defaultLives) {
+        return retrieveLivesOrDefaultAsPair(uuid, defaultLives).getKey();
     }
 }

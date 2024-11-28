@@ -2,13 +2,13 @@ package dev.heypr.yggdrasil.commands.impl;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.data.PlayerData;
-import dev.heypr.yggdrasil.misc.ColorManager;
+import dev.heypr.yggdrasil.misc.object.Pair;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 public class AddPlayerCommand implements CommandExecutor {
@@ -40,38 +40,22 @@ public class AddPlayerCommand implements CommandExecutor {
             return true;
         }
 
-        final int lives = PlayerData.retrieveLivesOrDefault(target.getUniqueId(), plugin.randomNumber(2, 6));
-        plugin.getPlayerData().putIfAbsent(target.getUniqueId(), new PlayerData(target.getUniqueId(), lives));
+        final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(target.getUniqueId(), plugin.randomNumber(2, 6));
+        final PlayerData data = new PlayerData(target.getUniqueId(), pair.getKey());
+        final boolean culling = plugin.isCullingSession && data.getLives() == 0;
 
-        target.sendTitle(ChatColor.GRAY + "You will have...", "", 10, 20, 10);
-        new BukkitRunnable() {
+        if (culling || !plugin.isCullingSession) {
+            target.setGameMode(GameMode.SURVIVAL);
 
-            int e = 5;
+            if (culling)
+                data.setLastChance(true);
 
-            @Override
-            public void run() {
-                if (e > 0) {
-                    int lives = plugin.randomNumber(2, 6);
-                    ChatColor color = ColorManager.getColor(lives);
-
-                    target.sendTitle(color + "" + lives + " lives",
-                            "",
-                            10, 20, 10);
-                    e--;
-                }
-                else {
-                    int lives = plugin.getPlayerData().get(target.getUniqueId()).getLives();
-                    ChatColor color = ColorManager.getColor(lives);
-
-                    target.sendTitle(color + "" + lives + " lives",
-                            "",
-                            10, 20, 10);
-
-                    ColorManager.setTabListName(plugin, target, plugin.getPlayerData().get(target.getUniqueId()).getLives());
-                    cancel();
-                }
-            }
-        }.runTaskTimer(plugin, 0, 5);
+            plugin.getPlayerData().putIfAbsent(target.getUniqueId(), data);
+            data.displayLives(pair.getValue());
+        } else {
+            target.setGameMode(GameMode.SPECTATOR);
+            target.sendMessage(ChatColor.GOLD + "Since your still alive, you do not get to participate in the culling session.");
+        }
 
         sender.sendMessage(ChatColor.GREEN + "Player " + target.getName() + " added.");
         return true;

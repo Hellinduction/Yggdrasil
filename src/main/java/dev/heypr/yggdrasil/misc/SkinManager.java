@@ -99,8 +99,26 @@ public final class SkinManager {
             return false;
 
         final JSONObject first = messages.getJSONObject(0);
+        final boolean found = first.getString("code").equals("skin_found");
 
-        return first.getString("code").equals("skin_found");
+        return found;
+    }
+
+    /**
+     * Checks whether a job is pending
+     * @param obj
+     * @return
+     */
+    private boolean isJobPending(final JSONObject obj) {
+        final JSONArray messages = obj.getJSONArray("messages");
+
+        if (messages.isEmpty())
+            return true;
+
+        final JSONObject first = messages.getJSONObject(0);
+        final boolean found = first.getString("code").equals("job_pending");
+
+        return found;
     }
 
     /**
@@ -155,7 +173,7 @@ public final class SkinManager {
                         final InputStream inputStream = response.getEntity().getContent();
                         final JSONObject obj = new JSONObject(new JSONTokener(inputStream));
 
-                        if (!obj.getBoolean("success")) {
+                        if (isJobPending(obj)) {
                             if (++failCounter > MAX_FAILS) {
                                 super.cancel();
                                 callback.accept(null, new Exception(String.format("Max attempts of %s exceeded", MAX_FAILS)));
@@ -208,8 +226,10 @@ public final class SkinManager {
             new Thread(() -> {
                 try {
                     final BiConsumer<JSONObject, Exception> apply = (dataObj, exception) -> {
-                        if (dataObj == null)
+                        if (dataObj == null) {
                             callback.accept(null, exception);
+                            return;
+                        }
 
                         final String newValue = dataObj.getString("value");
                         final String signature = dataObj.getString("signature");
@@ -335,8 +355,20 @@ public final class SkinManager {
         this.skin(player, file, null);
     }
 
-    public void skin(final Player player, final File file, final Consumer<Exception> exceptionConsumer) {
+    public void skin(final Player player, final File file, final Consumer<Boolean> callback) {
+        this.skin(player, file, callback, null);
+    }
+
+    public void skin(final Player player, final File file, final Consumer<Boolean> callback, final Consumer<Exception> exceptionConsumer) {
         this.getSkinData(file, (data, exception) -> {
+            if (exception != null && data == null && exceptionConsumer != null) {
+                exceptionConsumer.accept(exception);
+
+                if (callback != null)
+                    callback.accept(false); // Failed to set skin
+                return;
+            }
+
             if (data != null)
                 this.skinInternal(player, data, exception2 -> {
                     if (exceptionConsumer != null) {
@@ -347,6 +379,9 @@ public final class SkinManager {
                         else
                             exceptionConsumer.accept(null);
                     }
+
+                    if (callback != null)
+                        callback.accept(true); // Likely succeeded to set skin
                 });
         });
     }

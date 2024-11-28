@@ -39,10 +39,26 @@ public class PlayerDeathListener implements Listener {
 
         UUID uuid = player.getUniqueId();
         PlayerData data = plugin.getPlayerData().get(uuid);
-        if (data.getLives() == 0) return;
+
+        if (player.getKiller() != null) {
+            PlayerData killerData = plugin.getPlayerData().get(player.getKiller().getUniqueId());
+
+            if (killerData != null)
+                killerData.incrementKills();
+
+            // If above 3 kills they graduate to 1 life
+            killerData.checkGraduate();
+        }
+
+        if (data.hasLastChance())
+            data.setLastChance(false);
+
+        if (data.getLives() == 0)
+            return;
+
         data.decreaseLives(1);
         player.sendActionBar(Component.text("Lives: " + data.getLives()));
 
-        ColorManager.setTabListName(plugin, player, data.getLives());
+        ColorManager.setTabListName(player, data);
     }
 }

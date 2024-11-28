@@ -11,6 +11,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -31,7 +32,9 @@ public final class Yggdrasil extends JavaPlugin {
 
     Map<UUID, PlayerData> playerData = new HashMap<>();
     List<Player> deadPlayers = new ArrayList<>();
+
     public boolean isSessionRunning = false;
+    public boolean isCullingSession = false;
 
     public SkinManager skinManager;
     private FileConfiguration config;
@@ -81,6 +84,7 @@ public final class Yggdrasil extends JavaPlugin {
         registerEvent(new PlayerLeaveListener(this));
         registerEvent(new PlayerChatListener(this));
         registerEvent(new PlayerRespawnListener(this));
+        registerEvent(new PlayerChangeWorldListener(this));
 
         registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this)));
         registerCommand("addlives", new CommandWrapper(new AddLivesCommand(this)));
@@ -157,6 +161,11 @@ public final class Yggdrasil extends JavaPlugin {
 
     public void registerCommand(String command, CommandExecutor executor) {
         getCommand(command).setExecutor(executor);
+
+        if (executor instanceof TabCompleter tabCompleter)
+            getCommand(command).setTabCompleter(tabCompleter);
+        else if (executor instanceof CommandWrapper wrapper && wrapper.getExecutor() instanceof TabCompleter tabCompleter)
+            getCommand(command).setTabCompleter(tabCompleter);
     }
 
     public int randomNumber(int lower, int upper) {

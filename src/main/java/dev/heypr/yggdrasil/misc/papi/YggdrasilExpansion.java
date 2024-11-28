@@ -2,8 +2,7 @@ package dev.heypr.yggdrasil.misc.papi;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.data.PlayerData;
-import dev.heypr.yggdrasil.misc.papi.impl.BoogieManPlaceholder;
-import dev.heypr.yggdrasil.misc.papi.impl.LivesPlaceholder;
+import dev.heypr.yggdrasil.misc.papi.impl.*;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -29,6 +28,9 @@ public class YggdrasilExpansion extends PlaceholderExpansion {
     private void registerPlaceholders() {
         this.registerPlaceholder("lives", new LivesPlaceholder());
         this.registerPlaceholder("is_boogie_man", new BoogieManPlaceholder());
+        this.registerPlaceholder("kills", new KillsPlaceholder());
+        this.registerPlaceholder("has_last_chance", new LastChancePlaceholder());
+        this.registerPlaceholder("lives_color", new LivesColorPlaceholder());
     }
 
     private IPlaceholder getPlaceholder(final String placeholderStr) {
