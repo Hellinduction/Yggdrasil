@@ -9,7 +9,6 @@ This repository contains a plugin for managing game sessions, player skins, and 
 - **Player Skins**: Skins are applied based on the number of lives a player has.
 - **Discord Bot Integration**: Allows for bot activation with a Discord token.
 - **Culling Session**: A "last chance" session where only players with zero lives are available to participate.
-- **Custom Player Skins**: You can set specific skins for individual players by using their UUID.
 
 ### Discord Bot Setup
 
@@ -21,7 +20,7 @@ This repository contains a plugin for managing game sessions, player skins, and 
     ```
 
    - This will activate the Discord bot for your game plugin. Ensure that the token is correct and that your bot is authorized in your desired Discord server.
-   - Once the bot is starts working, it should generate 5 different roles: `dark_green`, `green`, `yellow`, `red`, and `gray`.
+   - Once the bot starts working, it should generate 5 different roles: `dark_green`, `green`, `yellow`, `red`, and `gray`.
    - These roles are used to display how many lives you have my making your name colored in the discord.
    - In order for this feature to work properly, the players must use the `/link` command in the discord and then type the code given to them in the Minecraft server chat.
 
