@@ -31,7 +31,7 @@ public class PlayerData {
         this.lives = lives;
         this.isBoogeyman = false;
 
-        this.update();
+        this.update(-1);
     }
 
     public void checkDead() {
@@ -72,18 +72,36 @@ public class PlayerData {
     }
 
     public void setLives(int amount) {
+        final int originalLives = this.lives;
+
         this.lives = amount;
-        this.update();
+        this.update(originalLives);
+        this.updateColor();
     }
 
     public void addLives(int amount) {
+        final int originalLives = this.lives;
+
         this.lives += amount;
-        this.update();
+        this.update(originalLives);
+        this.updateColor();
     }
 
     public void decreaseLives(int amount) {
+        final int originalLives = this.lives;
+
         this.lives -= amount;
-        this.update();
+        this.update(originalLives);
+        this.updateColor();
+    }
+
+    private void updateColor() {
+        final Player player = this.getPlayer();
+
+        if (player == null)
+            return;
+
+        ColorManager.setTabListName(Yggdrasil.plugin, player, this.lives);
     }
 
     private void updateSkin() {
@@ -164,10 +182,12 @@ public class PlayerData {
     /**
      * Updates some stuff based on the PlayerData state
      */
-    public void update() {
+    public void update(final int previousLives) {
+        if (previousLives == this.lives)
+            return;
+
         this.saveLives();
         this.updateSkin();
-        this.checkDead();
 
         if (Yggdrasil.plugin.getBot() != null)
             this.updateDiscordColor();

@@ -1,11 +1,9 @@
 package dev.heypr.yggdrasil;
 
-import dev.heypr.yggdrasil.commands.*;
+import dev.heypr.yggdrasil.commands.CommandWrapper;
+import dev.heypr.yggdrasil.commands.impl.*;
 import dev.heypr.yggdrasil.data.PlayerData;
-import dev.heypr.yggdrasil.events.PlayerChatListener;
-import dev.heypr.yggdrasil.events.PlayerDeathListener;
-import dev.heypr.yggdrasil.events.PlayerJoinListener;
-import dev.heypr.yggdrasil.events.PlayerLeaveListener;
+import dev.heypr.yggdrasil.events.*;
 import dev.heypr.yggdrasil.misc.SkinManager;
 import dev.heypr.yggdrasil.misc.discord.Bot;
 import net.kyori.adventure.text.TextComponent;
@@ -24,6 +22,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class Yggdrasil extends JavaPlugin {
     public static final int MAX_LIVES = 6;
@@ -81,18 +80,19 @@ public final class Yggdrasil extends JavaPlugin {
         registerEvent(new PlayerDeathListener(this));
         registerEvent(new PlayerLeaveListener(this));
         registerEvent(new PlayerChatListener(this));
+        registerEvent(new PlayerRespawnListener(this));
 
-        registerCommand("givelife", new GiveLifeCommand(this));
-        registerCommand("addlives", new AddLivesCommand(this));
-        registerCommand("lives", new LivesCommand(this));
-        registerCommand("removeboogeyman", new RemoveBoogeymanCommand(this));
-        registerCommand("setboogeyman", new SetBoogeymanCommand(this));
-        registerCommand("randomizeboogeyman", new RandomizeBoogeymanCommand(this));
-        registerCommand("startsession", new StartSessionCommand(this));
-        registerCommand("stopsession", new StopSessionCommand(this));
-        registerCommand("addplayer", new AddPlayerCommand(this));
-        registerCommand("skin", new SkinCommand(this));
-        registerCommand("setdiscordtoken", new SetDiscordTokenCommand(this));
+        registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this)));
+        registerCommand("addlives", new CommandWrapper(new AddLivesCommand(this)));
+        registerCommand("lives", new CommandWrapper(new LivesCommand(this), true));
+        registerCommand("removeboogeyman", new CommandWrapper(new RemoveBoogeymanCommand(this)));
+        registerCommand("setboogeyman", new CommandWrapper(new SetBoogeymanCommand(this)));
+        registerCommand("randomizeboogeyman", new CommandWrapper(new RandomizeBoogeymanCommand(this), true));
+        registerCommand("startsession", new CommandWrapper(new StartSessionCommand(this)));
+        registerCommand("stopsession", new CommandWrapper(new StopSessionCommand(this)));
+        registerCommand("addplayer", new CommandWrapper(new AddPlayerCommand(this), true));
+        registerCommand("skin", new CommandWrapper(new SkinCommand(this)));
+        registerCommand("setdiscordtoken", new CommandWrapper(new SetDiscordTokenCommand(this)));
 
         this.initPlaceholders();
         this.loadBot();
@@ -167,5 +167,16 @@ public final class Yggdrasil extends JavaPlugin {
         LegacyComponentSerializer legacy = LegacyComponentSerializer.legacyAmpersand();
         MiniMessage mm = MiniMessage.miniMessage();
         return legacy.deserialize(legacy.serialize(mm.deserialize(text).asComponent()));
+    }
+
+    public List<Player> getBoogieManPool() {
+        final List<Player> players = new ArrayList<>(plugin.getServer().getOnlinePlayers());
+        final List<Player> potentialBoogyMen = players.stream()
+                .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) != 0)
+                .collect(Collectors.toList());
+
+        Collections.shuffle(potentialBoogyMen);
+
+        return potentialBoogyMen;
     }
 }

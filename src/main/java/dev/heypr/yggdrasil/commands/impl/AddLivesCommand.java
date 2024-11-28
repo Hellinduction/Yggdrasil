@@ -1,4 +1,4 @@
-package dev.heypr.yggdrasil.commands;
+package dev.heypr.yggdrasil.commands.impl;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.data.PlayerData;
@@ -36,7 +36,6 @@ public class AddLivesCommand implements CommandExecutor {
 
         if (args.length == 2) {
             int amount = Integer.parseInt(args[1]);
-
             boolean tooLow = isSet ? amount < 0 : amount < 1;
 
             if (tooLow) {
@@ -68,8 +67,10 @@ public class AddLivesCommand implements CommandExecutor {
             if (revival)
                 targetData.revive();
 
-            if (isSet)
+            if (isSet) {
                 targetData.setLives(amount);
+                targetData.checkDead();
+            }
             else
                 targetData.addLives(amount);
             return true;

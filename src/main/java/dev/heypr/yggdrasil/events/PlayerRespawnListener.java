@@ -33,10 +33,12 @@ public class PlayerRespawnListener implements Listener {
             return;
         }
 
-        UUID uuid = player.getUniqueId();
-        PlayerData data = plugin.getPlayerData().get(uuid);
+        plugin.getScheduler().runTask(plugin, () -> {
+            UUID uuid = player.getUniqueId();
+            PlayerData data = plugin.getPlayerData().get(uuid);
 
-        player.sendActionBar(Component.text("Lives: " + data.getLives()));
-        data.checkDead();
+            player.sendActionBar(Component.text("Lives: " + data.getLives()));
+            data.checkDead();
+        });
     }
 }

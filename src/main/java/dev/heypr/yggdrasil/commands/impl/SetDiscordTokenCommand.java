@@ -1,4 +1,4 @@
-package dev.heypr.yggdrasil.commands;
+package dev.heypr.yggdrasil.commands.impl;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import org.bukkit.ChatColor;

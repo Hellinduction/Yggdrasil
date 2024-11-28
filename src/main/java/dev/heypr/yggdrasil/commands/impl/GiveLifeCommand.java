@@ -1,4 +1,4 @@
-package dev.heypr.yggdrasil.commands;
+package dev.heypr.yggdrasil.commands.impl;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.data.PlayerData;
@@ -35,8 +35,8 @@ public class GiveLifeCommand implements CommandExecutor {
         }
 
         if (args.length == 2) {
-
             int amount = Integer.parseInt(args[1]);
+
             if (amount < 1) {
                 sender.sendMessage("Invalid amount.");
                 return true;
@@ -77,6 +77,8 @@ public class GiveLifeCommand implements CommandExecutor {
                 targetData.revive();
 
             playerData.decreaseLives(amount);
+            playerData.checkDead();
+
             targetData.addLives(amount);
             return true;
         }

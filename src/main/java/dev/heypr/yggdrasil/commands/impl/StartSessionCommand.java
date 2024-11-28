@@ -1,4 +1,4 @@
-package dev.heypr.yggdrasil.commands;
+package dev.heypr.yggdrasil.commands.impl;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.data.PlayerData;
@@ -41,13 +41,16 @@ public class StartSessionCommand implements CommandExecutor {
         if (players.isEmpty()) return true;
 
         int numBoogeymen = plugin.randomNumber(1, 3);
+        List<Player> potentialBoogyMen = plugin.getBoogieManPool();
 
-        for (int i = 0; i < numBoogeymen && i < players.size() - 1; i++) {
-            Player boogeyman = players.get(i);
+        for (int i = 0; i < numBoogeymen && i < potentialBoogyMen.size() - 1; i++) {
+            final Player boogeyman = potentialBoogyMen.get(i);
             final int lives = PlayerData.retrieveLivesOrDefault(boogeyman.getUniqueId(), plugin.randomNumber(2, 6));
+            final PlayerData data = new PlayerData(boogeyman.getUniqueId(), lives);
 
-            playerData.put(boogeyman.getUniqueId(), new PlayerData(boogeyman.getUniqueId(), lives));
+            playerData.put(boogeyman.getUniqueId(), data);
             playerData.get(boogeyman.getUniqueId()).setBoogeyman(true);
+            data.checkDead();
 
             boogeyman.sendTitle(ChatColor.GRAY + "You will have...", "", 10, 20, 10);
 
@@ -98,7 +101,11 @@ public class StartSessionCommand implements CommandExecutor {
 
         players.forEach(player -> {
             final int lives = PlayerData.retrieveLivesOrDefault(player.getUniqueId(), plugin.randomNumber(2, 6));
-            playerData.putIfAbsent(player.getUniqueId(), new PlayerData(player.getUniqueId(), lives));
+            final PlayerData data = new PlayerData(player.getUniqueId(), lives);
+
+            playerData.putIfAbsent(player.getUniqueId(), data);
+            data.checkDead();
+
             if (!playerData.get(player.getUniqueId()).isBoogeyman()) {
                 player.sendTitle(ChatColor.GRAY + "You will have...", "", 10, 20, 10);
                 new BukkitRunnable() {

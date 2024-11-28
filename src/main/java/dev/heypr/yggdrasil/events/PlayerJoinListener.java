@@ -39,7 +39,8 @@ public class PlayerJoinListener implements Listener {
 
         final PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
 
-        playerData.update();
+        playerData.update(-1);
+        playerData.checkDead();
 
         ColorManager.setTabListName(plugin, player, plugin.getPlayerData().get(player.getUniqueId()).getLives());
 
