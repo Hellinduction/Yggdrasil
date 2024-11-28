@@ -52,6 +52,9 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
                             boogeyman.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
                             plugin.getScheduler().runTaskLater(plugin, () -> {
                                 boogeyman.sendTitle(ChatColor.RED + "THE BOOGEYMAN!", "", 10, 70, 20);
+
+                                boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou are the &6&lBoogeyman&4&l!!!"));
+                                boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&lRemember, as the &6&lBoogeyman&7&l your goal is to kill 1 player during this session."));
                             }, 60L);
                         }, 20L);
                     }, 20L);
