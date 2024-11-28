@@ -9,8 +9,6 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.UUID;
 
@@ -28,6 +26,8 @@ public class PlayerRespawnListener implements Listener {
         Player player = event.getPlayer();
 
         if (!plugin.getPlayerData().containsKey(player.getUniqueId())) {
+            player.setGameMode(GameMode.ADVENTURE);
+
             plugin.getServer().getOperators().forEach((op) -> {
                 if (!(op.isOnline())) return;
                 op.getPlayer().sendMessage(ChatColor.DARK_RED + "[URGENT] Player " + player.getName() + " does not have game data. They will be treated as a dead player. Add them to the list of players using /addplayer <player>");
@@ -36,16 +36,12 @@ public class PlayerRespawnListener implements Listener {
             return;
         }
 
-        UUID uuid = player.getUniqueId();
-        PlayerData data = plugin.getPlayerData().get(uuid);
+        plugin.getScheduler().runTask(plugin, () -> {
+            UUID uuid = player.getUniqueId();
+            PlayerData data = plugin.getPlayerData().get(uuid);
 
-        player.sendActionBar(Component.text("Lives: " + data.getLives()));
-        if (data.getLives() == 0) {
-            player.setGameMode(GameMode.ADVENTURE);
-
-            player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 500));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 500));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 500));
-        }
+            player.sendActionBar(Component.text("Lives: " + data.getLives()));
+            data.checkDead();
+        });
     }
 }

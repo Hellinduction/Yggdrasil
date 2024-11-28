@@ -1,17 +1,15 @@
 package dev.heypr.yggdrasil.events;
 
 import dev.heypr.yggdrasil.Yggdrasil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import dev.heypr.yggdrasil.data.PlayerData;
+import dev.heypr.yggdrasil.misc.ColorManager;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 public class PlayerJoinListener implements Listener {
 
@@ -25,13 +23,19 @@ public class PlayerJoinListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+
         if (!plugin.isSessionRunning) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> player.setGameMode(GameMode.ADVENTURE), 10L);
+
             player.sendTitle(ChatColor.RED + "Game not started", "Please wait for the game to start", 10, 70, 20);
             return;
         }
+
         if (!plugin.getPlayerData().containsKey(player.getUniqueId())) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> player.setGameMode(GameMode.ADVENTURE), 10L);
+
             player.sendTitle(ChatColor.RED + "Game in progress", ChatColor.RED + "You are not part of the game", 10, 70, 20);
-            player.sendMessage(ChatColor.GREEN + "Game in progress. Request an admin to add you to the game using /addplayer <player>");
+            player.sendMessage(ChatColor.RED + "Game in progress. Request an admin to add you to the game using /addplayer <player>");
 
             plugin.getServer().getOperators().forEach((op) -> {
                 if (!(op.isOnline())) return;
@@ -41,32 +45,13 @@ public class PlayerJoinListener implements Listener {
             return;
         }
 
-        player.sendActionBar(Component.text("Lives: " + plugin.getPlayerData().get(player.getUniqueId()).getLives()));
-        Component lives = Component.text(" (" + plugin.getPlayerData().get(player.getUniqueId()).getLives() + " lives)").decoration(TextDecoration.ITALIC, false).color(TextColor.color(128, 128, 128));
+        final PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
 
-        player.playerListName(player.name().append(lives));
-        switch (plugin.getPlayerData().get(player.getUniqueId()).getLives()) {
-            case 5, 6:
-                player.playerListName(player.name().color(TextColor.color(0, 170, 0)).append(lives));
-                break;
-            case 3, 4:
-                player.playerListName(player.name().color(TextColor.color(85, 255, 85)).append(lives));
-                break;
-            case 2:
-                player.playerListName(player.name().color(TextColor.color(255, 255, 85)).append(lives));
-                break;
-            case 1:
-                player.playerListName(player.name().color(TextColor.color(255, 85, 85)).append(lives));
-                break;
-            case 0:
-                player.playerListName(player.name().color(TextColor.color(170, 170, 170)).append(lives));
+        playerData.update(-1);
+        playerData.checkDead();
 
-                player.setGameMode(GameMode.ADVENTURE);
+        ColorManager.setTabListName(player, plugin.getPlayerData().get(player.getUniqueId()));
 
-                player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 500));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 500));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 500));
-                break;
-        }
+        plugin.getScheduler().runTaskLater(plugin, () -> ColorManager.setTabListName(player, plugin.getPlayerData().get(player.getUniqueId())), 20L); // To fix it incase the skin thing removes it
     }
 }
