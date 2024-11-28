@@ -47,14 +47,11 @@ public class AddPlayerCommand implements CommandExecutor {
         if (culling || !plugin.isCullingSession) {
             target.setGameMode(GameMode.SURVIVAL);
 
-            if (culling)
+            if (culling && PlayerData.retrieveLives(target.getUniqueId()) == 0)
                 data.setLastChance(true);
 
             plugin.getPlayerData().putIfAbsent(target.getUniqueId(), data);
             data.displayLives(pair.getValue());
-        } else {
-            target.setGameMode(GameMode.SPECTATOR);
-            target.sendMessage(ChatColor.GOLD + "Since your still alive, you do not get to participate in the culling session.");
         }
 
         sender.sendMessage(ChatColor.GREEN + "Player " + target.getName() + " added.");

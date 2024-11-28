@@ -29,7 +29,7 @@ public class AddLivesCommand implements CommandExecutor {
         }
 
         Player target = sender.getServer().getPlayer(args[0]);
-        boolean isSet = label.equalsIgnoreCase("setlives");
+        boolean isSet = label.toLowerCase().endsWith("setlives");
 
         if (target == null) {
             sender.sendMessage(ChatColor.RED + "Player not found.");

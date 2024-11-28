@@ -232,10 +232,8 @@ public class PlayerData {
 
             final Player player = this.getPlayer();
 
-            if (player != null && player.isOnline()) {
+            if (player != null && player.isOnline())
                 player.sendMessage(ChatColor.GREEN + "You successfully got 3 killed, you have regained a life!");
-                player.setGameMode(GameMode.SPECTATOR);
-            }
         }
     }
 
