@@ -1,4 +1,4 @@
-**Yggdrasil**
+## Yggdrasil
 
 This is a plugin for a Gamemode inspired by One Life!
 
