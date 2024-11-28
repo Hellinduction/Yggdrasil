@@ -29,7 +29,7 @@ public class StartSessionCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         if (plugin.isSessionRunning) {
-            sender.sendMessage("Game is already running.");
+            sender.sendMessage(ChatColor.RED + "Game is already running.");
             return true;
         }
 

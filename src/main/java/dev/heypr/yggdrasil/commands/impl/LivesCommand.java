@@ -1,6 +1,8 @@
 package dev.heypr.yggdrasil.commands.impl;
 
 import dev.heypr.yggdrasil.Yggdrasil;
+import dev.heypr.yggdrasil.misc.ColorManager;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -18,19 +20,26 @@ public class LivesCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            sender.sendMessage("You have " + plugin.getPlayerData().get(((Player) sender).getUniqueId()).getLives() + " lives.");
+            final int lives = plugin.getPlayerData().get(((Player) sender).getUniqueId()).getLives();
+            final ChatColor color = ColorManager.getColor(lives);
+
+            sender.sendMessage(ChatColor.GREEN + "You have " + color + lives + ChatColor.GREEN + String.format(" %s.", lives == 1 ? "life" : "lives"));
         }
         else if (args.length == 1) {
             Player target = sender.getServer().getPlayer(args[0]);
             if (target == null) {
-                sender.sendMessage("Player not found");
+                sender.sendMessage(ChatColor.RED + "Player not found.");
                 return true;
             }
-            sender.sendMessage(target.getName() + " has " + plugin.getPlayerData().get(target.getUniqueId()).getLives() + " lives.");
+
+            final int lives = plugin.getPlayerData().get(target.getUniqueId()).getLives();
+            final ChatColor color = ColorManager.getColor(lives);
+
+            sender.sendMessage(ChatColor.GREEN + target.getName() + " has " + color + lives + ChatColor.GREEN + String.format(" %s.", lives == 1 ? "life" : "lives"));
             return true;
         }
         else {
-            sender.sendMessage("Usage: /lives [player]");
+            sender.sendMessage(ChatColor.RED + "Usage: /lives [player]");
         }
 
         return true;

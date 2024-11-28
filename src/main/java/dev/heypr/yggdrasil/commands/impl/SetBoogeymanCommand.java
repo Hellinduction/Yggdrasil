@@ -1,6 +1,7 @@
 package dev.heypr.yggdrasil.commands.impl;
 
 import dev.heypr.yggdrasil.Yggdrasil;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -18,7 +19,7 @@ public class SetBoogeymanCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            sender.sendMessage("Usage: /setboogeyman <player>");
+            sender.sendMessage(ChatColor.RED + "Usage: /setboogeyman <player>");
             return true;
         }
 
@@ -27,21 +28,21 @@ public class SetBoogeymanCommand implements CommandExecutor {
             Player target = sender.getServer().getPlayer(args[0]);
 
             if (target == null) {
-                sender.sendMessage("Player not found");
+                sender.sendMessage(ChatColor.RED + "Player not found.");
                 return true;
             }
 
             if (plugin.getPlayerData().get(target.getUniqueId()).isBoogeyman()) {
-                sender.sendMessage(target.getName() + " is already a Boogeyman.");
+                sender.sendMessage(ChatColor.RED + target.getName() + " is already a Boogeyman.");
                 return true;
             }
 
             plugin.getPlayerData().get(target.getUniqueId()).setBoogeyman(true);
-            sender.sendMessage(target.getName() + " is now a Boogeyman.");
+            sender.sendMessage(ChatColor.GREEN + target.getName() + " is now a Boogeyman.");
             return true;
         }
         else {
-            sender.sendMessage("Usage: /setboogeyman <player>");
+            sender.sendMessage(ChatColor.RED + "Usage: /setboogeyman <player>");
         }
 
         return true;

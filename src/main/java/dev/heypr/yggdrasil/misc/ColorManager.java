@@ -52,18 +52,10 @@ public final class ColorManager {
     }
 
     public static ChatColor getColor(int lives) {
-        switch (lives) {
-            case 0:
-                return ChatColor.GRAY;
-            case 1:
-                return ChatColor.RED;
-            case 2:
-                return ChatColor.YELLOW;
-            case 4, 3:
-                return ChatColor.GREEN;
-            case 6, 5:
-                return ChatColor.DARK_GREEN;
-        }
+        final Colors colors = Colors.from(lives);
+
+        if (colors != null)
+            return ChatColor.valueOf(colors.name());
 
         return null;
     }

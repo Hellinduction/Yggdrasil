@@ -2,6 +2,8 @@ package dev.heypr.yggdrasil.commands.impl;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.data.PlayerData;
+import dev.heypr.yggdrasil.misc.ColorManager;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,7 +24,7 @@ public class AddLivesCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(String.format("Usage: /%s <player> <amount>", label));
+            sender.sendMessage(ChatColor.RED + String.format("Usage: /%s <player> <amount>", label));
             return true;
         }
 
@@ -30,7 +32,7 @@ public class AddLivesCommand implements CommandExecutor {
         boolean isSet = label.equalsIgnoreCase("setlives");
 
         if (target == null) {
-            sender.sendMessage("Player not found");
+            sender.sendMessage(ChatColor.RED + "Player not found.");
             return true;
         }
 
@@ -39,7 +41,7 @@ public class AddLivesCommand implements CommandExecutor {
             boolean tooLow = isSet ? amount < 0 : amount < 1;
 
             if (tooLow) {
-                sender.sendMessage("Invalid amount.");
+                sender.sendMessage(ChatColor.RED + "Invalid amount.");
                 return true;
             }
 
@@ -48,16 +50,18 @@ public class AddLivesCommand implements CommandExecutor {
             boolean aboveMax = isSet ? amount > Yggdrasil.MAX_LIVES : targetLives + amount > Yggdrasil.MAX_LIVES;
 
             if (aboveMax) {
-                sender.sendMessage(String.format("Player cannot have more than %s lives.", Yggdrasil.MAX_LIVES));
+                sender.sendMessage(ChatColor.RED + String.format("Player cannot have more than %s lives.", Yggdrasil.MAX_LIVES));
                 return true;
             }
 
+            final ChatColor color = ColorManager.getColor(amount);
+
             if (!isSet) {
-                player.sendMessage("You have given " + amount + " lives to " + target.getName());
-                target.sendMessage("You have been given " + amount + " lives");
+                player.sendMessage(ChatColor.GREEN + "You have given " + color + amount + ChatColor.GREEN + " lives to " + target.getName());
+                target.sendMessage(ChatColor.GREEN + "You have been given " + color + amount + ChatColor.GREEN + " lives");
             } else {
-                player.sendMessage("You have set the lives of " + target.getName() + " to " + amount);
-                target.sendMessage("Your lives have been set to " + amount);
+                player.sendMessage(ChatColor.GREEN + "You have set the lives of " + target.getName() + " to " + color + amount);
+                target.sendMessage(ChatColor.GREEN + "Your lives have been set to " + color + amount);
             }
 
             boolean currentlyDead = targetLives == 0;
@@ -77,7 +81,7 @@ public class AddLivesCommand implements CommandExecutor {
         }
 
         else {
-            sender.sendMessage("Invalid amount.");
+            sender.sendMessage(ChatColor.RED + "Invalid amount.");
         }
 
         return true;

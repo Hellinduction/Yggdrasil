@@ -24,19 +24,19 @@ public class AddPlayerCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         if (args.length < 1) {
-            sender.sendMessage("Usage: /addplayer <player>");
+            sender.sendMessage(ChatColor.RED + "Usage: /addplayer <player>");
             return true;
         }
 
         Player target = sender.getServer().getPlayer(args[0]);
 
         if (target == null) {
-            sender.sendMessage("Player not found.");
+            sender.sendMessage(ChatColor.RED + "Player not found.");
             return true;
         }
 
         if (plugin.getPlayerData().containsKey(target.getUniqueId())) {
-            sender.sendMessage("Player already added.");
+            sender.sendMessage(ChatColor.RED + "Player already added.");
             return true;
         }
 
@@ -73,7 +73,7 @@ public class AddPlayerCommand implements CommandExecutor {
             }
         }.runTaskTimer(plugin, 0, 5);
 
-        sender.sendMessage("Player " + target.getName() + " added.");
+        sender.sendMessage(ChatColor.GREEN + "Player " + target.getName() + " added.");
         return true;
     }
 }

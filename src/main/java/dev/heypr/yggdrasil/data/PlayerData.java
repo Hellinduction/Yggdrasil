@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -56,7 +57,7 @@ public class PlayerData {
         if (player == null || !player.isOnline())
             return;
 
-        player.sendTitle("You have been revived!", "", 10, 20, 10);
+        player.sendTitle(ChatColor.GREEN + "You have been revived!", "", 10, 20, 10);
         player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
         player.removePotionEffect(PotionEffectType.WEAKNESS);
         player.removePotionEffect(PotionEffectType.RESISTANCE);
