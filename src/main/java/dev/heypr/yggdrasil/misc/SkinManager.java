@@ -362,10 +362,13 @@ public final class SkinManager {
     public void skin(final Player player, final File file, final Consumer<Boolean> callback, final Consumer<Exception> exceptionConsumer) {
         this.getSkinData(file, (data, exception) -> {
             if (exception != null && data == null && exceptionConsumer != null) {
-                exceptionConsumer.accept(exception);
+                Yggdrasil.plugin.getScheduler().runTask(Yggdrasil.plugin, () -> {
+                    exceptionConsumer.accept(exception);
 
-                if (callback != null)
-                    callback.accept(false); // Failed to set skin
+                    if (callback != null)
+                        callback.accept(false); // Failed to set skin
+                });
+
                 return;
             }
 
