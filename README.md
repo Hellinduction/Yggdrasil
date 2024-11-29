@@ -8,7 +8,7 @@ This repository contains a plugin for managing game sessions, player skins, and 
 
 - **Player Skins**: Skins are applied based on the number of lives a player has.
 - **Discord Bot Integration**: Allows for bot activation with a Discord token.
-- **Culling Session**: A "last chance" session offering the ability to come back to life by getting 3 kills.
+- **Culling Session**: A "last chance" session offering dead players the ability to come back to life by getting 3 kills.
 
 ### Discord Bot Setup
 
