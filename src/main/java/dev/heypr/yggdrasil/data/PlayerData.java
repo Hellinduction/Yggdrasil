@@ -225,6 +225,7 @@ public class PlayerData {
 
     public void setLastChance(final boolean lastChance) {
         this.lastChance = lastChance;
+        this.updateColor();
     }
 
     public int getKills() {
