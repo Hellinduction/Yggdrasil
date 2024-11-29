@@ -2,13 +2,13 @@
 
 This is a plugin for a Gamemode inspired by One Life!
 
-This repository contains a plugin for managing game sessions, player skins, and integrating with a Discord bot for updating colors in the discord. Players can be assigned skins based on the number of lives they have left in the game, and there’s functionality for creating a special "last chance" session where only dead players are present.
+This repository contains a plugin for managing game sessions, player skins, and integrating with a Discord bot for updating colors in the discord. Players can be assigned skins based on the number of lives they have left in the game, and there’s functionality for creating a special "last chance" session where all players dead or alive are present.
 
 ## Features
 
 - **Player Skins**: Skins are applied based on the number of lives a player has.
 - **Discord Bot Integration**: Allows for bot activation with a Discord token.
-- **Culling Session**: A "last chance" session where only players with zero lives are available to participate.
+- **Culling Session**: A "last chance" session offering the ability to come back to life by getting 3 kills.
 
 ### Discord Bot Setup
 
