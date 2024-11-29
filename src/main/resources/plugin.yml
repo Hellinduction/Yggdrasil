@@ -48,3 +48,7 @@ commands:
     permission: yggdrasil.setdiscordtoken
     description: Sets the token for the discord bot
     aliases: [token]
+  listboogeymen:
+    permission: yggdrasil.listboogeymen
+    description: Displays a list of boogiemen to the player that ran this command
+    aliases: [listboogeyman, boogeylist]

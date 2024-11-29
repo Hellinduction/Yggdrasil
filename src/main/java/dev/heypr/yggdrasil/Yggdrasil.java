@@ -97,6 +97,7 @@ public final class Yggdrasil extends JavaPlugin {
         registerCommand("addplayer", new CommandWrapper(new AddPlayerCommand(this), true));
         registerCommand("skin", new CommandWrapper(new SkinCommand(this), false, true));
         registerCommand("setdiscordtoken", new CommandWrapper(new SetDiscordTokenCommand(this)));
+        registerCommand("listboogeymen", new CommandWrapper(new ListBoogeyMenCommand(this), true, false));
 
         this.initPlaceholders();
         this.loadBot();
