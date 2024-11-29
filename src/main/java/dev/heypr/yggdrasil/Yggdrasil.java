@@ -88,14 +88,14 @@ public final class Yggdrasil extends JavaPlugin {
 
         registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this)));
         registerCommand("addlives", new CommandWrapper(new AddLivesCommand(this)));
-        registerCommand("lives", new CommandWrapper(new LivesCommand(this), true));
+        registerCommand("lives", new CommandWrapper(new LivesCommand(this), true, true));
         registerCommand("removeboogeyman", new CommandWrapper(new RemoveBoogeymanCommand(this)));
         registerCommand("setboogeyman", new CommandWrapper(new SetBoogeymanCommand(this)));
         registerCommand("randomizeboogeyman", new CommandWrapper(new RandomizeBoogeymanCommand(this), true));
         registerCommand("startsession", new CommandWrapper(new StartSessionCommand(this)));
         registerCommand("stopsession", new CommandWrapper(new StopSessionCommand(this)));
         registerCommand("addplayer", new CommandWrapper(new AddPlayerCommand(this), true));
-        registerCommand("skin", new CommandWrapper(new SkinCommand(this)));
+        registerCommand("skin", new CommandWrapper(new SkinCommand(this), false, true));
         registerCommand("setdiscordtoken", new CommandWrapper(new SetDiscordTokenCommand(this)));
 
         this.initPlaceholders();
@@ -178,14 +178,33 @@ public final class Yggdrasil extends JavaPlugin {
         return legacy.deserialize(legacy.serialize(mm.deserialize(text).asComponent()));
     }
 
-    public List<Player> getBoogieManPool() {
+    /**
+     * Returns all people that could be boogie man
+     * @return
+     */
+    private List<Player> getBoogieManPool() {
         final List<Player> players = new ArrayList<>(plugin.getServer().getOnlinePlayers());
         final List<Player> potentialBoogyMen = players.stream()
-                .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) != 0)
+                .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) != 0 && PlayerData.retrieveLives(player.getUniqueId()) != 1)
                 .collect(Collectors.toList());
 
         Collections.shuffle(potentialBoogyMen);
 
         return potentialBoogyMen;
+    }
+
+    /**
+     * Randomly picks a number of Boogeymen from the eligible pool.
+     * @param boogieMen Number of Boogeymen to select.
+     * @return List of players who were selected as Boogeymen.
+     */
+    public List<Player> pickBoogieMen(final int boogieMen) {
+        final List<Player> boogieManPool = this.getBoogieManPool();
+
+        Collections.shuffle(boogieManPool);
+
+        return boogieManPool.stream()
+                .limit(boogieMen)
+                .collect(Collectors.toList());
     }
 }

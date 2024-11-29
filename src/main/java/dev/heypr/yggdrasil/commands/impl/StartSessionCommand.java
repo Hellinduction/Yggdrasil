@@ -48,10 +48,9 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
         }
 
         int numBoogeymen = plugin.randomNumber(1, 3);
-        List<Player> potentialBoogeyMen = plugin.getBoogieManPool();
+        List<Player> boogieMen = plugin.pickBoogieMen(numBoogeymen);
 
-        for (int i = 0; i < numBoogeymen && i < potentialBoogeyMen.size() - 1; i++) {
-            final Player boogeyman = potentialBoogeyMen.get(i);
+        for (final Player boogeyman : boogieMen) {
             final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(boogeyman.getUniqueId(), plugin.randomNumber(2, 6));
             final PlayerData data = new PlayerData(boogeyman.getUniqueId(), pair.getKey());
 
@@ -73,7 +72,7 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
                                 boogeyman.sendTitle(ChatColor.RED + "THE BOOGEYMAN!", "", 10, 70, 20);
 
                                 boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou are the &6&lBoogeyman&4&l!!!"));
-                                boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&lRemember, as the &6&lBoogeyman&7&l your goal is to kill 1 player during this session."));
+                                boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&lRemember, as the &6&lBoogeyman&7&l your goal is to kill 1 &c&lnon-red&7&l name during this session."));
                             }, 60L);
                         }, 20L);
                     }, 20L);

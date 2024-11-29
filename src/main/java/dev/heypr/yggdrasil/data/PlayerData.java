@@ -112,6 +112,15 @@ public class PlayerData {
         ColorManager.setTabListName(player, this);
     }
 
+    private void fixPlayerData(final Player player) {
+        ColorManager.setTabListName(player, this); // Set their lives to display again (setting skin messes it up)
+
+        if (player.getGameMode() == GameMode.SPECTATOR) {
+            player.setGameMode(GameMode.SURVIVAL);
+            player.setGameMode(GameMode.SPECTATOR);
+        }
+    }
+
     private void updateSkin() {
         final Player player = this.getPlayer();
 
@@ -124,7 +133,7 @@ public class PlayerData {
             return;
 
         Yggdrasil.plugin.skinManager.skin(player, skinFile, success -> Yggdrasil.plugin.getScheduler().runTaskLater(Yggdrasil.plugin, () -> {
-            ColorManager.setTabListName(player, this); // Set their lives to display again (setting skin messes it up)
+            this.fixPlayerData(player);
         }, 20L));
     }
 

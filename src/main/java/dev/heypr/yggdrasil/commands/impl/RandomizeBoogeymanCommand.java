@@ -34,10 +34,9 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
             data.setBoogeyman(false);
 
         int numBoogeymen = plugin.randomNumber(1, 3);
-        List<Player> potentialBoogyMen = plugin.getBoogieManPool();
+        List<Player> boogieMen = plugin.pickBoogieMen(numBoogeymen);
 
-        for (int i = 0; i < numBoogeymen && i < potentialBoogyMen.size() - 1; i++) {
-            Player boogeyman = potentialBoogyMen.get(i);
+        for (final Player boogeyman : boogieMen) {
             final int lives = PlayerData.retrieveLivesOrDefault(boogeyman.getUniqueId(), plugin.randomNumber(2, 6));
             playerData.putIfAbsent(boogeyman.getUniqueId(), new PlayerData(boogeyman.getUniqueId(), lives));
             playerData.get(boogeyman.getUniqueId()).setBoogeyman(true);
@@ -67,19 +66,24 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
                 plugin.getScheduler().runTaskLater(plugin, () -> {
                     final int lives = PlayerData.retrieveLivesOrDefault(player.getUniqueId(), plugin.randomNumber(2, 6));
                     playerData.putIfAbsent(player.getUniqueId(), new PlayerData(player.getUniqueId(), lives));
-                    player.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
-                    plugin.getScheduler().runTaskLater(plugin, () -> {
-                        player.sendTitle(ChatColor.YELLOW + "2", "", 10, 20, 10);
+
+                    final boolean showTitle = plugin.isCullingSession || PlayerData.retrieveLives(player.getUniqueId()) != 0;
+
+                    if (showTitle) {
+                        player.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
                         plugin.getScheduler().runTaskLater(plugin, () -> {
-                            player.sendTitle(ChatColor.RED + "1", "", 10, 20, 10);
+                            player.sendTitle(ChatColor.YELLOW + "2", "", 10, 20, 10);
                             plugin.getScheduler().runTaskLater(plugin, () -> {
-                                player.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
+                                player.sendTitle(ChatColor.RED + "1", "", 10, 20, 10);
                                 plugin.getScheduler().runTaskLater(plugin, () -> {
-                                    player.sendTitle(ChatColor.GREEN + "NOT THE BOOGEYMAN!", "", 10, 70, 20);
-                                }, 60L);
+                                    player.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
+                                    plugin.getScheduler().runTaskLater(plugin, () -> {
+                                        player.sendTitle(ChatColor.GREEN + "NOT THE BOOGEYMAN!", "", 10, 70, 20);
+                                    }, 60L);
+                                }, 20L);
                             }, 20L);
                         }, 20L);
-                    }, 20L);
+                    }
                 }, 40L);
             }
         });

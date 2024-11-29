@@ -10,7 +10,6 @@ softdepend:
   - PlaceholderAPI
 commands:
   lives:
-    permission: yggdrasil.lives
     description: Shows the number of lives you have left.
     aliases: [l]
   addlives:
@@ -18,7 +17,6 @@ commands:
     description: Add/set a number of lives to a player.
     aliases: [al, setlives]
   givelife:
-    permission: yggdrasil.givelife
     description: Sets the number of lives you have left.
     aliases: [gl]
   startsession:

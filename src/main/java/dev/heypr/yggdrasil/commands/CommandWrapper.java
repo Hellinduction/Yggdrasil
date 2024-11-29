@@ -6,14 +6,21 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public final class CommandWrapper implements CommandExecutor {
     private final CommandExecutor executor;
     private final boolean requireActiveSession;
+    private final boolean playerOnly;
 
-    public CommandWrapper(final CommandExecutor executor, final boolean requireActiveSession) {
+    public CommandWrapper(final CommandExecutor executor, final boolean requireActiveSession, final boolean playerOnly) {
         this.executor = executor;
         this.requireActiveSession = requireActiveSession;
+        this.playerOnly = playerOnly;
+    }
+
+    public CommandWrapper(final CommandExecutor executor, final boolean requireActiveSession) {
+        this(executor, requireActiveSession, false);
     }
 
     public CommandWrapper(final CommandExecutor executor) {
@@ -22,6 +29,11 @@ public final class CommandWrapper implements CommandExecutor {
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+        if (this.playerOnly && !(sender instanceof Player)) {
+            sender.sendMessage(ChatColor.RED + "You must be a player to use this command.");
+            return true;
+        }
+
         if (this.requireActiveSession && !Yggdrasil.plugin.isSessionRunning) {
             sender.sendMessage(ChatColor.RED + "The session must be started in order to use this command.");
             return true;
