@@ -81,6 +81,9 @@ public class TrapListeners implements Listener {
             for (final Location check : toCheck) {
                 final Location lavaLocation = entry.getKey();
 
+                if (!lavaLocation.getWorld().equals(check.getWorld()))
+                    continue;
+
                 if (lavaLocation.distance(check) <= 1D)
                     return entry.getValue();
             }
