@@ -48,9 +48,9 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
         }
 
         int numBoogeymen = plugin.randomNumber(1, 3);
-        List<Player> boogieMen = plugin.pickBoogieMen(numBoogeymen);
+        List<Player> boogeyMen = plugin.pickBoogeyMen(numBoogeymen);
 
-        for (final Player boogeyman : boogieMen) {
+        for (final Player boogeyman : boogeyMen) {
             final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(boogeyman.getUniqueId(), plugin.randomNumber(2, 6));
             final PlayerData data = new PlayerData(boogeyman.getUniqueId(), pair.getKey());
 

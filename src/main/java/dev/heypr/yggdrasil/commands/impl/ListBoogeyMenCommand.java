@@ -33,13 +33,13 @@ public final class ListBoogeyMenCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
-        final List<String> boogieMen = Bukkit.getOnlinePlayers().stream()
+        final List<String> boogeyMen = Bukkit.getOnlinePlayers().stream()
                 .filter(player -> plugin.getPlayerData().containsKey(player.getUniqueId()) && plugin.getPlayerData().get(player.getUniqueId()).isBoogeyman())
                 .map(Player::getName)
                 .collect(Collectors.toList());
-        final String list = this.formatStringList(boogieMen);
+        final String list = this.formatStringList(boogeyMen);
 
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&7Boogie Men (%s): %s", boogieMen.size(), list)));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&7Boogeymen (%s): %s", boogeyMen.size(), list)));
         return true;
     }
 }

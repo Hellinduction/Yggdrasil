@@ -76,8 +76,8 @@ public class GiveLifeCommand implements CommandExecutor {
 
             final ChatColor color = ColorManager.getColor(amount);
 
-            player.sendMessage(ChatColor.GREEN + "You have given " + color + amount + ChatColor.GREEN + " lives to " + target.getName());
-            target.sendMessage(ChatColor.GREEN + "You have been given " + color + amount + ChatColor.GREEN + " lives");
+            player.sendMessage(ChatColor.GREEN + "You have given " + color + amount + ChatColor.GREEN + " lives to " + target.getName() + ".");
+            target.sendMessage(ChatColor.GREEN + "You have been given " + color + amount + ChatColor.GREEN + " lives.");
 
             final PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
             final PlayerData targetData = plugin.getPlayerData().get(target.getUniqueId());

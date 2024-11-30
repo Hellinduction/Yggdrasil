@@ -34,9 +34,9 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
             data.setBoogeyman(false);
 
         int numBoogeymen = plugin.randomNumber(1, 3);
-        List<Player> boogieMen = plugin.pickBoogieMen(numBoogeymen);
+        List<Player> boogeyMen = plugin.pickBoogeyMen(numBoogeymen);
 
-        for (final Player boogeyman : boogieMen) {
+        for (final Player boogeyman : boogeyMen) {
             final int lives = PlayerData.retrieveLivesOrDefault(boogeyman.getUniqueId(), plugin.randomNumber(2, 6));
             playerData.putIfAbsent(boogeyman.getUniqueId(), new PlayerData(boogeyman.getUniqueId(), lives));
             playerData.get(boogeyman.getUniqueId()).setBoogeyman(true);

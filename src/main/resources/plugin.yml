@@ -50,5 +50,5 @@ commands:
     aliases: [token]
   listboogeymen:
     permission: yggdrasil.listboogeymen
-    description: Displays a list of boogiemen to the player that ran this command
+    description: Displays a list of boogeymen to the player that ran this command
     aliases: [listboogeyman, boogeylist]

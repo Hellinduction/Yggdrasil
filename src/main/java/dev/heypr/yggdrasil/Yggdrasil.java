@@ -85,6 +85,7 @@ public final class Yggdrasil extends JavaPlugin {
         registerEvent(new PlayerChatListener(this));
         registerEvent(new PlayerRespawnListener(this));
         registerEvent(new PlayerChangeWorldListener(this));
+        registerEvent(new TrapListeners(this));
 
         registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this)));
         registerCommand("addlives", new CommandWrapper(new AddLivesCommand(this)));
@@ -180,10 +181,10 @@ public final class Yggdrasil extends JavaPlugin {
     }
 
     /**
-     * Returns all people that could be boogie man
+     * Returns all people that could be boogeyman
      * @return
      */
-    private List<Player> getBoogieManPool() {
+    private List<Player> getBoogeyManPool() {
         final List<Player> players = new ArrayList<>(plugin.getServer().getOnlinePlayers());
         final List<Player> potentialBoogyMen = players.stream()
                 .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) != 0 && PlayerData.retrieveLives(player.getUniqueId()) != 1)
@@ -196,16 +197,21 @@ public final class Yggdrasil extends JavaPlugin {
 
     /**
      * Randomly picks a number of Boogeymen from the eligible pool.
-     * @param boogieMen Number of Boogeymen to select.
+     * @param boogeyMen Number of Boogeymen to select.
      * @return List of players who were selected as Boogeymen.
      */
-    public List<Player> pickBoogieMen(final int boogieMen) {
-        final List<Player> boogieManPool = this.getBoogieManPool();
+    public List<Player> pickBoogeyMen(int boogeyMen) {
+        final int onlinePlayers = Bukkit.getOnlinePlayers().size();
 
-        Collections.shuffle(boogieManPool);
+        if (boogeyMen >= onlinePlayers && onlinePlayers != 1)
+            boogeyMen = onlinePlayers - 1;
 
-        return boogieManPool.stream()
-                .limit(boogieMen)
+        final List<Player> boogeyManPool = this.getBoogeyManPool();
+
+        Collections.shuffle(boogeyManPool);
+
+        return boogeyManPool.stream()
+                .limit(boogeyMen)
                 .collect(Collectors.toList());
     }
 }

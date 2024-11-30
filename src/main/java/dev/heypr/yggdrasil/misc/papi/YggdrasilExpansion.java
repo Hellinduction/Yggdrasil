@@ -8,12 +8,15 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class YggdrasilExpansion extends PlaceholderExpansion {
+    public record PlaceholderMetaData(String name, String[] aliases) {}
+
     private final Yggdrasil plugin;
-    private final Map<String, IPlaceholder> placeholdersMap = new HashMap<>();
+    private final Map<PlaceholderMetaData, IPlaceholder> placeholdersMap = new HashMap<>();
 
     public YggdrasilExpansion(final Yggdrasil plugin) {
         this.plugin = plugin;
@@ -21,13 +24,13 @@ public class YggdrasilExpansion extends PlaceholderExpansion {
         this.registerPlaceholders();
     }
 
-    private void registerPlaceholder(final String name, final IPlaceholder placeholder) {
-        this.placeholdersMap.put(name.toLowerCase(), placeholder);
+    private void registerPlaceholder(final String name, final IPlaceholder placeholder, final String... aliases) {
+        this.placeholdersMap.put(new PlaceholderMetaData(name.toLowerCase(), aliases), placeholder);
     }
 
     private void registerPlaceholders() {
         this.registerPlaceholder("lives", new LivesPlaceholder());
-        this.registerPlaceholder("is_boogie_man", new BoogieManPlaceholder());
+        this.registerPlaceholder("is_boogey_man", new BoogeyManPlaceholder(), "is_boogey_man");
         this.registerPlaceholder("kills", new KillsPlaceholder());
         this.registerPlaceholder("has_last_chance", new LastChancePlaceholder());
         this.registerPlaceholder("lives_color", new LivesColorPlaceholder());
@@ -35,8 +38,8 @@ public class YggdrasilExpansion extends PlaceholderExpansion {
 
     private IPlaceholder getPlaceholder(final String placeholderStr) {
         final String placeholderLower = placeholderStr.toLowerCase();
-        final Map.Entry<String, IPlaceholder> placeholderEntry = this.placeholdersMap.entrySet().stream()
-                .filter(entry -> placeholderLower.startsWith(entry.getKey()))
+        final Map.Entry<PlaceholderMetaData, IPlaceholder> placeholderEntry = this.placeholdersMap.entrySet().stream()
+                .filter(entry -> placeholderLower.equals(entry.getKey().name()) || Arrays.stream(entry.getKey().aliases()).anyMatch(alias -> placeholderLower.equals(alias)))
                 .findFirst()
                 .orElse(null);
 
@@ -79,11 +82,11 @@ public class YggdrasilExpansion extends PlaceholderExpansion {
         IPlaceholder placeholder = getPlaceholder(placeholderStr);
 
         if (playerData == null)
-            return placeholder.nullPlayerData(); // Likely the session has not started yet
+            return placeholder.nullPlayerData(); // Likely the session has not started yet or they joined late
 
         if (placeholder != null)
             return placeholder.resolve(playerData);
 
-        return "";
+        return ""; // Placeholder is null
     }
 }
