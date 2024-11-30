@@ -51,6 +51,8 @@ public class AddPlayerCommand implements CommandExecutor {
                 data.setLastChance(true);
 
             plugin.getPlayerData().putIfAbsent(target.getUniqueId(), data);
+
+            data.checkDead();
             data.displayLives(pair.getValue());
         }
 

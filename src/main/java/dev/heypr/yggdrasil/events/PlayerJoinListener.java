@@ -8,6 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
@@ -20,7 +21,7 @@ public class PlayerJoinListener implements Listener {
     }
 
     @SuppressWarnings("all")
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
@@ -48,7 +49,7 @@ public class PlayerJoinListener implements Listener {
         final PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
 
         playerData.update(-1);
-        playerData.checkDead();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> playerData.checkDead(), 10L);
 
         ColorManager.setTabListName(player, plugin.getPlayerData().get(player.getUniqueId()));
 

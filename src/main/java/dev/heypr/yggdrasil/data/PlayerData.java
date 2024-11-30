@@ -17,7 +17,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
@@ -65,9 +64,9 @@ public class PlayerData {
             return;
 
         player.sendTitle(ChatColor.GREEN + "You have been revived!", "", 10, 20, 10);
-        player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
-        player.removePotionEffect(PotionEffectType.WEAKNESS);
-        player.removePotionEffect(PotionEffectType.RESISTANCE);
+//        player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
+//        player.removePotionEffect(PotionEffectType.WEAKNESS);
+//        player.removePotionEffect(PotionEffectType.RESISTANCE);
         player.setGameMode(GameMode.SURVIVAL);
     }
 
