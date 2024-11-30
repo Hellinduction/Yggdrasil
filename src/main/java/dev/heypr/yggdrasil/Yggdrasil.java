@@ -190,8 +190,6 @@ public final class Yggdrasil extends JavaPlugin {
                 .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) != 0 && PlayerData.retrieveLives(player.getUniqueId()) != 1)
                 .collect(Collectors.toList());
 
-        Collections.shuffle(potentialBoogyMen);
-
         return potentialBoogyMen;
     }
 
@@ -201,12 +199,11 @@ public final class Yggdrasil extends JavaPlugin {
      * @return List of players who were selected as Boogeymen.
      */
     public List<Player> pickBoogeyMen(int boogeyMen) {
-        final int onlinePlayers = Bukkit.getOnlinePlayers().size();
-
-        if (boogeyMen >= onlinePlayers && onlinePlayers != 1)
-            boogeyMen = onlinePlayers - 1;
-
         final List<Player> boogeyManPool = this.getBoogeyManPool();
+        final int boogeyManPoolCount = boogeyManPool.size();
+
+        if (boogeyMen >= boogeyManPoolCount && boogeyManPoolCount != 1)
+            boogeyMen = boogeyManPoolCount - 1;
 
         Collections.shuffle(boogeyManPool);
 
