@@ -9,6 +9,7 @@ This repository contains a plugin for managing game sessions, player skins, and 
 - **Player Skins**: Skins are applied based on the number of lives a player has.
 - **Discord Bot Integration**: Allows for bot activation with a Discord token.
 - **Culling Session**: A "last chance" session offering dead players the ability to come back to life by getting 3 kills.
+- **PlaceholderAPI**: This plugin supports several placeholders. Useful for allowing other plugins compatible with PlaceholderAPI to display data from this plugin through setting config values.
 
 ### Discord Bot Setup
 
@@ -37,3 +38,11 @@ For each player with a specific number of lives, the following images should be 
 - `red.png` for players with 1 life.
 
 It it also worth mentioning that it also supports a grayscaled version of the skin, however, this is automatically generated given that the green skin exists.
+
+## Placeholders
+
+- %yggdrasil_lives%
+- %yggdrasil_is_boogey_man%
+- %yggdrasil_kills%
+- %yggdrasil_has_last_chance%
+- %yggdrasil_lives_color%
