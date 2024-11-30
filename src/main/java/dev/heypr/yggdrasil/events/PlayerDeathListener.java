@@ -5,15 +5,20 @@ import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.misc.ColorManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.GameRule;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class PlayerDeathListener implements Listener {
 
@@ -26,14 +31,23 @@ public class PlayerDeathListener implements Listener {
 
     @SuppressWarnings("all")
     @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent event) {
+    public void onPlayerDeath(final PlayerDeathEvent event) {
         final Player player = event.getEntity();
-        final List<ItemStack> originalDrops = new ArrayList<>(event.getDrops());
+        final List<ItemStack> originalDrops = Arrays.asList(player.getInventory().getContents()).stream()
+                .filter(item -> item != null)
+                .filter(item -> {
+                    final boolean hasVanishingCurse = item.getItemMeta().hasEnchant(Enchantment.VANISHING_CURSE);
+                    final boolean emptyItem = item.getType() == Material.AIR || item.getAmount() <= 0;
 
-        event.setKeepInventory(true);
-        event.setKeepLevel(true);
-        event.setShouldDropExperience(false);
-        event.getDrops().clear();
+                    return !hasVanishingCurse && !emptyItem;
+                })
+                .collect(Collectors.toList());
+        final boolean keepInv = player.getWorld().getGameRuleValue(GameRule.KEEP_INVENTORY).booleanValue() || player.getGameMode() == GameMode.SPECTATOR;
+
+//        event.setKeepInventory(true);
+//        event.setKeepLevel(true);
+//        event.setShouldDropExperience(false);
+//        event.getDrops().clear();
 
         if (!plugin.isSessionRunning)
             return; // No action taken since the session is not running
@@ -68,10 +82,12 @@ public class PlayerDeathListener implements Listener {
         else if (data.getLives() == 1) {
             player.getWorld().strikeLightningEffect(player.getLocation());
 
-            event.setKeepInventory(false);
-            event.setKeepLevel(false);
-            event.setShouldDropExperience(true);
-            event.getDrops().addAll(originalDrops);
+            if (keepInv) {
+                event.setKeepInventory(false);
+                event.setKeepLevel(false);
+                event.setShouldDropExperience(true);
+                event.getDrops().addAll(originalDrops);
+            }
 
 //            final long now = Instant.now().getEpochSecond();
 //
