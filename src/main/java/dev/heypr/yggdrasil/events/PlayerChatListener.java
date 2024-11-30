@@ -24,8 +24,14 @@ public final class PlayerChatListener implements Listener {
         final String message = e.getMessage();
         final LinkCommand linkCommand = CommandManager.getCommand("link");
 
-        if (!linkCommand.getCodeMap().keySet().contains(message))
+        if (!linkCommand.getCodeMap().keySet().contains(message)) {
+            if (!player.isOp() && plugin.getConfig().getBoolean("chat.disabled")) {
+                e.setCancelled(true);
+                player.sendMessage(ChatColor.RED + "Chat is disabled.");
+            }
+
             return;
+        }
 
         final LinkCommand.DiscordId discordId = linkCommand.getCodeMap().get(message);
 

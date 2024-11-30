@@ -73,7 +73,7 @@ public class AddLivesCommand implements CommandExecutor {
 
             if (isSet) {
                 targetData.setLives(amount);
-                targetData.checkDead();
+                targetData.checkLives();
             }
             else
                 targetData.addLives(amount);

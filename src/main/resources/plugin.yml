@@ -52,3 +52,6 @@ commands:
     permission: yggdrasil.listboogeymen
     description: Displays a list of boogeymen to the player that ran this command
     aliases: [listboogeyman, boogeylist]
+  togglechat:
+    permission: yggdrasil.togglechat
+    description: Toggle chat usage on and off for non-opped players

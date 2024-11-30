@@ -86,7 +86,7 @@ public class GiveLifeCommand implements CommandExecutor {
 //                targetData.revive();
 
             playerData.decreaseLives(amount);
-            playerData.checkDead();
+            playerData.checkLives();
 
             targetData.addLives(amount);
             return true;

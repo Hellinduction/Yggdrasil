@@ -56,7 +56,7 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
 
             playerData.put(boogeyman.getUniqueId(), data);
             playerData.get(boogeyman.getUniqueId()).setBoogeyman(true);
-            data.checkDead();
+            data.checkLives();
 
             data.displayLives(pair.getValue());
 
@@ -95,7 +95,7 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
                 data.setLastChance(true);
 
             if (!playerData.get(player.getUniqueId()).isBoogeyman()) {
-                data.checkDead();
+                data.checkLives();
                 data.displayLives(pair.getValue());
 
                 final boolean showTitle = plugin.isCullingSession || PlayerData.retrieveLives(player.getUniqueId()) != 0;

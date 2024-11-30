@@ -9,12 +9,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class PlayerDeathListener implements Listener {
 
     private final Yggdrasil plugin;
+//    private final Map<ItemStack, Long> protectedDrops = new HashMap<>();
 
     public PlayerDeathListener(Yggdrasil plugin) {
         this.plugin = plugin;
@@ -23,7 +27,13 @@ public class PlayerDeathListener implements Listener {
     @SuppressWarnings("all")
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-        Player player = event.getEntity();
+        final Player player = event.getEntity();
+        final List<ItemStack> originalDrops = new ArrayList<>(event.getDrops());
+
+        event.setKeepInventory(true);
+        event.setKeepLevel(true);
+        event.setShouldDropExperience(false);
+        event.getDrops().clear();
 
         if (!plugin.isSessionRunning)
             return; // No action taken since the session is not running
@@ -55,10 +65,49 @@ public class PlayerDeathListener implements Listener {
 
         if (data.getLives() == 0)
             return;
+        else if (data.getLives() == 1) {
+            player.getWorld().strikeLightningEffect(player.getLocation());
+
+            event.setKeepInventory(false);
+            event.setKeepLevel(false);
+            event.setShouldDropExperience(true);
+            event.getDrops().addAll(originalDrops);
+
+//            final long now = Instant.now().getEpochSecond();
+//
+//            for (final ItemStack drop : event.getDrops())
+//                this.protectedDrops.put(drop, now);
+        }
 
         data.decreaseLives(1);
         player.sendActionBar(Component.text("Lives: " + data.getLives()));
 
         ColorManager.setTabListName(player, data);
     }
+
+//    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+//    public void onEntityDamage(final EntityDamageEvent e) {
+//        if (e.getCause() != EntityDamageEvent.DamageCause.LIGHTNING)
+//            return;
+//
+//        final Entity entity = e.getEntity();
+//
+//        if (!(entity instanceof Item item))
+//            return;
+//
+//        if (!this.protectedDrops.containsKey(item.getItemStack()))
+//            return;
+//
+//        final long now = Instant.now().getEpochSecond();
+//        final long then = this.protectedDrops.get(item.getItemStack());
+//        final long diff = now - then;
+//
+//        if (diff > 3) {
+//            this.protectedDrops.remove(item.getItemStack());
+//            return;
+//        }
+//
+//        e.setCancelled(true);
+//        this.protectedDrops.remove(item.getItemStack());
+//    }
 }

@@ -39,7 +39,7 @@ public class StopSessionCommand implements CommandExecutor {
 
             if (playerData.hasLastChance()) {
                 playerData.setLastChance(false);
-                playerData.checkDead();
+                playerData.checkLives();
             }
 //            Player player = plugin.getServer().getPlayer(uuid);
 

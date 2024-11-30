@@ -49,7 +49,7 @@ public class PlayerJoinListener implements Listener {
         final PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
 
         playerData.update(-1);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> playerData.checkDead(), 10L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> playerData.checkLives(), 10L);
 
         ColorManager.setTabListName(player, plugin.getPlayerData().get(player.getUniqueId()));
 

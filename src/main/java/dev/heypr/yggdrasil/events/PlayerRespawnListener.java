@@ -41,7 +41,7 @@ public class PlayerRespawnListener implements Listener {
             PlayerData data = plugin.getPlayerData().get(uuid);
 
             player.sendActionBar(Component.text("Lives: " + data.getLives()));
-            data.checkDead();
+            data.checkLives();
         });
     }
 }

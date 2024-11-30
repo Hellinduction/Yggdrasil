@@ -66,6 +66,11 @@ public final class Yggdrasil extends JavaPlugin {
         if (!this.config.contains("players"))
             this.config.createSection("players");
 
+        if (!this.config.contains("chat")) {
+            section = this.config.createSection("chat");
+            section.set("disabled", true);
+        }
+
         this.saveConfig();
     }
 
@@ -101,6 +106,7 @@ public final class Yggdrasil extends JavaPlugin {
         registerCommand("skin", new CommandWrapper(new SkinCommand(this), false, true));
         registerCommand("setdiscordtoken", new CommandWrapper(new SetDiscordTokenCommand(this)));
         registerCommand("listboogeymen", new CommandWrapper(new ListBoogeyMenCommand(this), true, false));
+        registerCommand("togglechat", new CommandWrapper(new ToggleChatCommand(this)));
 
         this.initPlaceholders();
         this.loadBot();

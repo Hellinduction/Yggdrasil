@@ -17,6 +17,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
@@ -46,22 +48,37 @@ public class PlayerData {
         return true;
     }
 
-    public void checkDead() {
-        if (!this.isDead())
-            return;
+    private void givePotionEffects(final Player player) {
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 1));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 1));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, PotionEffect.INFINITE_DURATION, 0));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 0));
+    }
 
+    private void removePotionEffects(final Player player) {
+        player.removePotionEffect(PotionEffectType.RESISTANCE);
+        player.removePotionEffect(PotionEffectType.WEAKNESS);
+        player.removePotionEffect(PotionEffectType.SLOWNESS);
+        player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
+    }
+
+    public void checkLives() {
         final Player player = this.getPlayer();
 
         if (player == null || !player.isOnline())
             return;
 
-        player.setGameMode(GameMode.SPECTATOR);
+        if (!this.isDead()) {
+            if (this.lives == 1)
+                this.givePotionEffects(player);
+            else if (this.lives == 2)
+                this.removePotionEffects(player);
 
-//        player.setGameMode(GameMode.ADVENTURE);
-//
-//        player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, PotionEffect.INFINITE_DURATION, 500));
-//        player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 500));
-//        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 500));
+            return;
+        }
+
+        this.removePotionEffects(player);
+        player.setGameMode(GameMode.SPECTATOR);
     }
 
     public void revive() {
@@ -71,9 +88,6 @@ public class PlayerData {
             return;
 
         player.sendTitle(ChatColor.GREEN + "You have been revived!", "", 10, 20, 10);
-//        player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
-//        player.removePotionEffect(PotionEffectType.WEAKNESS);
-//        player.removePotionEffect(PotionEffectType.RESISTANCE);
         player.setGameMode(GameMode.SURVIVAL);
     }
 

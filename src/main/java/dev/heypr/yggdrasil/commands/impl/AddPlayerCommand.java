@@ -52,7 +52,7 @@ public class AddPlayerCommand implements CommandExecutor {
 
             plugin.getPlayerData().putIfAbsent(target.getUniqueId(), data);
 
-            data.checkDead();
+            data.checkLives();
             data.displayLives(pair.getValue());
         }
 
