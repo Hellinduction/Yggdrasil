@@ -39,13 +39,20 @@ public class PlayerData {
         this.update(-1);
     }
 
+    public boolean isDead() {
+        if (this.lives != 0 || this.lastChance)
+            return false;
+
+        return true;
+    }
+
     public void checkDead() {
+        if (!this.isDead())
+            return;
+
         final Player player = this.getPlayer();
 
         if (player == null || !player.isOnline())
-            return;
-
-        if (this.lives != 0 || this.lastChance)
             return;
 
         player.setGameMode(GameMode.SPECTATOR);
