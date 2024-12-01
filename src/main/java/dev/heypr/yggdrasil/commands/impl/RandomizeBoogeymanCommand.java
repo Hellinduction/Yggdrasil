@@ -30,8 +30,16 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
 
         if (players.isEmpty()) return true;
 
-        for (final PlayerData data : playerData.values())
-            data.setBoogeyman(false);
+        for (final PlayerData data : playerData.values()) {
+            if (data.isBoogeyman()) {
+                data.setBoogeyman(false);
+
+                final Player player = data.getPlayer();
+
+                if (player != null && player.isOnline())
+                    player.sendMessage(ChatColor.RED + "You have been cured! You are no longer the boogeyman.");
+            }
+        }
 
         int numBoogeymen = plugin.randomNumber(1, 3);
         List<Player> boogeyMen = plugin.pickBoogeyMen(numBoogeymen);
