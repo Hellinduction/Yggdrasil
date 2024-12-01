@@ -75,8 +75,10 @@ public class AddLivesCommand implements CommandExecutor {
                 targetData.setLives(amount);
                 targetData.checkLives();
             }
-            else
+            else {
                 targetData.addLives(amount);
+                targetData.checkLives();
+            }
             return true;
         }
 

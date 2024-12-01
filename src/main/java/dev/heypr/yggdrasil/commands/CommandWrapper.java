@@ -12,11 +12,17 @@ public final class CommandWrapper implements CommandExecutor {
     private final CommandExecutor executor;
     private final boolean requireActiveSession;
     private final boolean playerOnly;
+    private final boolean requireConfirmation;
 
-    public CommandWrapper(final CommandExecutor executor, final boolean requireActiveSession, final boolean playerOnly) {
+    public CommandWrapper(final CommandExecutor executor, final boolean requireActiveSession, final boolean playerOnly, final boolean requireConfirmation) {
         this.executor = executor;
         this.requireActiveSession = requireActiveSession;
         this.playerOnly = playerOnly;
+        this.requireConfirmation = requireConfirmation;
+    }
+
+    public CommandWrapper(final CommandExecutor executor, final boolean requireActiveSession, final boolean playerOnly) {
+        this(executor, requireActiveSession, playerOnly, false);
     }
 
     public CommandWrapper(final CommandExecutor executor, final boolean requireActiveSession) {
@@ -36,6 +42,11 @@ public final class CommandWrapper implements CommandExecutor {
 
         if (this.requireActiveSession && !Yggdrasil.plugin.isSessionRunning) {
             sender.sendMessage(ChatColor.RED + "The session must be started in order to use this command.");
+            return true;
+        }
+
+        if (this.requireConfirmation && !(args.length > 0 && "confirm".equalsIgnoreCase(args[0]))) {
+            sender.sendMessage(ChatColor.RED + String.format("You must type '/%s confirm' in order to execute this command.", label));
             return true;
         }
 

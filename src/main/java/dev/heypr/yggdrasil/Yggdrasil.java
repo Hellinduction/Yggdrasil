@@ -6,6 +6,7 @@ import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.events.*;
 import dev.heypr.yggdrasil.misc.SkinManager;
 import dev.heypr.yggdrasil.misc.discord.Bot;
+import dev.heypr.yggdrasil.misc.object.SkinData;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -78,7 +79,7 @@ public final class Yggdrasil extends JavaPlugin {
     public void onEnable() {
         plugin = this;
 
-        ConfigurationSerialization.registerClass(SkinManager.SkinData.class);
+        ConfigurationSerialization.registerClass(SkinData.class);
 
         this.initConfig();
 
@@ -107,6 +108,8 @@ public final class Yggdrasil extends JavaPlugin {
         registerCommand("setdiscordtoken", new CommandWrapper(new SetDiscordTokenCommand(this)));
         registerCommand("listboogeymen", new CommandWrapper(new ListBoogeyMenCommand(this), true, false));
         registerCommand("togglechat", new CommandWrapper(new ToggleChatCommand(this)));
+        registerCommand("wipelives", new CommandWrapper(new WipeLivesCommand(this), false, false, true));
+        registerCommand("preloadskins", new CommandWrapper(new PreloadSkinsCommand(this), false, false, false));
 
         this.initPlaceholders();
         this.loadBot();

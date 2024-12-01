@@ -340,4 +340,19 @@ public class PlayerData {
     public static int retrieveLivesOrDefault(final UUID uuid, final int defaultLives) {
         return retrieveLivesOrDefaultAsPair(uuid, defaultLives).getKey();
     }
+
+    public static int clearPlayers() {
+        if (!Yggdrasil.plugin.getConfig().contains("players"))
+            return -1;
+
+        final int size = Yggdrasil.plugin.getConfig().getConfigurationSection("players").getKeys(false).size();
+
+        Yggdrasil.plugin.getConfig().set("players", null);
+        Yggdrasil.plugin.getConfig().createSection("players");
+        Yggdrasil.plugin.getPlayerData().clear();
+
+        Yggdrasil.plugin.saveConfig();
+
+        return size;
+    }
 }

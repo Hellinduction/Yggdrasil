@@ -3,6 +3,7 @@ package dev.heypr.yggdrasil.misc;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import dev.heypr.yggdrasil.Yggdrasil;
+import dev.heypr.yggdrasil.misc.object.SkinData;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,7 +17,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -32,8 +32,6 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Base64;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -54,30 +52,6 @@ public final class SkinManager {
 
     public SkinManager(final Yggdrasil plugin) {
         this.plugin = plugin;
-    }
-
-    public record SkinData(String skinValue, String skinSignature) implements ConfigurationSerializable {
-        @Override
-        public Map<String, Object> serialize() {
-            final Map<String, Object> data = new HashMap<>();
-
-            data.put("skinValue", this.skinValue);
-            data.put("skinSignature", this.skinSignature);
-
-            return data;
-        }
-
-        public static SkinData deserialize(final Map<String, Object> args) {
-            return new SkinData((String) args.get("skinValue"), (String) args.get("skinSignature"));
-        }
-
-        @Override
-        public String toString() {
-            return "SkinData{" +
-                    "skinValue='" + skinValue + '\'' +
-                    ", skinSignature='" + skinSignature + '\'' +
-                    '}';
-        }
     }
 
     private JSONObject extractData(final JSONObject obj) {
@@ -205,7 +179,22 @@ public final class SkinManager {
         return skinData;
     }
 
-    private void getSkinData(final File file, final BiConsumer<SkinData, Exception> callback) {
+    private SkinData saveSkinData(final String value, final JSONObject dataObj) {
+        final String newValue = dataObj.getString("value");
+        final String signature = dataObj.getString("signature");
+        final SkinData data = new SkinData(newValue, signature);
+
+        plugin.getScheduler().runTask(plugin, () -> {
+            final ConfigurationSection section = plugin.getConfig().getConfigurationSection("skins.stored");
+
+            section.set(value, data);
+            plugin.saveConfig();
+        });
+
+        return data;
+    }
+
+    public void getSkinData(final File file, final BiConsumer<SkinData, Exception> callback) {
         if (!file.exists()) {
             callback.accept(null, null);
             return;
@@ -219,6 +208,7 @@ public final class SkinManager {
             final SkinData saved = this.getSavedSkinData(value);
 
             if (saved != null) {
+                saved.setRetrievedFromSave(true);
                 callback.accept(saved, null);
                 return;
             }
@@ -231,14 +221,7 @@ public final class SkinManager {
                             return;
                         }
 
-                        final String newValue = dataObj.getString("value");
-                        final String signature = dataObj.getString("signature");
-                        final SkinData data = new SkinData(newValue, signature);
-
-                        final ConfigurationSection section = plugin.getConfig().getConfigurationSection("skins.stored");
-
-                        section.set(value, data);
-                        plugin.saveConfig();
+                        final SkinData data = this.saveSkinData(value, dataObj);
 
                         callback.accept(data, exception);
                     };

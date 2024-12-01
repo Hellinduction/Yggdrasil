@@ -55,3 +55,10 @@ commands:
   togglechat:
     permission: yggdrasil.togglechat
     description: Toggle chat usage on and off for non-opped players
+  wipelives:
+    permission: yggdrasil.wipelives
+    description: Wipe all the stored data about the players (Use with caution!!)
+    aliases: [wipeplayers, wipeplayerdata]
+  preloadskins:
+    permission: yggdrasil.preloadskins
+    description: Preload all the skins in the plugin's data folder
