@@ -158,17 +158,23 @@ public class PlayerData {
     }
 
     private void removeOtherColorRoles(final Guild guild, final Member member, final ColorManager.Colors exclude) {
+        final ConfigurationSection rolesSection = EventListener.getRoles(guild.getId());
+
+        if (rolesSection == null)
+            return;
+
         for (final ColorManager.Colors colors : ColorManager.Colors.values()) {
             if (colors == exclude)
                 continue;
 
             final String roleName = colors.name().toLowerCase();
-            final Role role = guild.getRolesByName(roleName, false).get(0);
+            final String id = rolesSection.getString(roleName);
+            final Role role = guild.getRoleById(id);
 
             if (role == null)
                 continue;
 
-            if (!BotUtils.hasRole(member, roleName))
+            if (!BotUtils.hasRole(member, id))
                 continue;
 
             guild.removeRoleFromMember(member, role).queue();
@@ -188,12 +194,17 @@ public class PlayerData {
         final User user = Bot.bot.getUserById(discordId);
         final Guild guild = EventListener.guild;
         final Member member = guild.getMember(user);
-        final Role role = guild.getRolesByName(roleName, false).get(0);
+        final ConfigurationSection rolesSection = EventListener.getRoles(guild.getId());
+
+        if (rolesSection == null)
+            return;
+
+        final Role role = guild.getRoleById(rolesSection.getString(roleName));
 
         if (role == null)
             return;
 
-        if (BotUtils.hasRole(member, roleName))
+        if (BotUtils.hasRole(member, role.getId()))
             return;
 
         this.removeOtherColorRoles(guild, member, colors);

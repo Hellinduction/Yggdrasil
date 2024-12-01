@@ -4,6 +4,7 @@ import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.misc.ColorManager;
 import dev.heypr.yggdrasil.misc.discord.command.CommandManager;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -13,20 +14,32 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public final class EventListener extends ListenerAdapter {
     public static Guild guild;
 
-    private void createRole(final Guild guild, final ColorManager.Colors colors) {
+    private void createRole(final Guild guild, final ColorManager.Colors colors, final Consumer<Role> roleConsumer) {
+        final ConfigurationSection rolesSection = getRoles(guild.getId());
         final String name = colors.name().toLowerCase();
-        final boolean exists = guild.getRolesByName(name, false).stream().anyMatch(role -> role.getColor().equals(colors.getColor()));
+        final boolean exists = rolesSection != null && rolesSection.contains(name);
 
         if (!exists) {
             guild.createRole()
                     .setColor(colors.getColor())
                     .setName(name)
-                    .queue();
+                    .queue(roleConsumer::accept);
         }
+    }
+
+    public static ConfigurationSection getRoles(final String guildId) {
+        final String name = String.format("discord.guilds.%s.roles", guildId);
+
+        if (!Yggdrasil.plugin.getConfig().contains(name))
+            return null;
+
+        final ConfigurationSection section = Yggdrasil.plugin.getConfig().getConfigurationSection(name);
+        return section;
     }
 
     @Override
@@ -52,8 +65,28 @@ public final class EventListener extends ListenerAdapter {
             Yggdrasil.plugin.saveConfig();
         }
 
-        for (final ColorManager.Colors colors : ColorManager.Colors.values())
-            this.createRole(guild, colors);
+        if (!section.contains("roles"))
+            section = section.createSection("roles");
+        else
+            section = section.getConfigurationSection("roles");
+
+        final ConfigurationSection finalSection = section;
+
+        for (final ColorManager.Colors colors : ColorManager.Colors.values()) {
+            final String roleName = colors.name().toLowerCase();
+
+            if (!finalSection.contains(roleName) && !guild.getRolesByName(roleName, false).isEmpty()) {
+                final Role role = guild.getRolesByName(roleName, false).get(0);
+                finalSection.set(roleName, role.getId());
+                Yggdrasil.plugin.saveConfig();
+                continue;
+            }
+
+            this.createRole(guild, colors, role -> Yggdrasil.plugin.getScheduler().runTask(Yggdrasil.plugin, () -> {
+                finalSection.set(roleName, role.getId());
+                Yggdrasil.plugin.saveConfig();
+            }));
+        }
     }
 
     private void createSlashCommands(final Guild guild) {

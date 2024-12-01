@@ -60,8 +60,8 @@ public final class BotUtils {
         return Bot.bot.getTextChannelById(channel.getId());
     }
 
-    public static boolean hasRole(final Member member, final String roleName) {
-        return member.getRoles().stream().filter(role -> role.getName().equals(roleName)).findFirst()
+    public static boolean hasRole(final Member member, final String id) {
+        return member.getRoles().stream().filter(role -> role.getId().equals(id)).findFirst()
                 .orElse(null) != null;
     }
 
