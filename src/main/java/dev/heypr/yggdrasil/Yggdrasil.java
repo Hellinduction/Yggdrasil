@@ -216,6 +216,9 @@ public final class Yggdrasil extends JavaPlugin {
         if (boogeyMen >= boogeyManPoolCount && boogeyManPoolCount != 1)
             boogeyMen = boogeyManPoolCount - 1;
 
+        if (boogeyMen < 0)
+            boogeyMen = 0;
+
         Collections.shuffle(boogeyManPool);
 
         return boogeyManPool.stream()

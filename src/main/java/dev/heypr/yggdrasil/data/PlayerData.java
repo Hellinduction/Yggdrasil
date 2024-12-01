@@ -69,9 +69,9 @@ public class PlayerData {
             return;
 
         if (!this.isDead()) {
-            if (this.lives == 1)
+            if (this.lives == 0)
                 this.givePotionEffects(player);
-            else if (this.lives == 2)
+            else if (this.lives > 0)
                 this.removePotionEffects(player);
 
             return;
