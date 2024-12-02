@@ -7,6 +7,8 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -151,9 +153,33 @@ public final class ColorManager {
         return skinFile;
     }
 
+    private static void setSuffix(final Player player, final int lives, final String suffix) {
+        final Scoreboard scoreboard = Yggdrasil.plugin.getScoreboard();
+
+        if (scoreboard == null)
+            return;
+
+        final ChatColor color = getColor(lives);
+        final String teamName = lives + "_team";
+
+        Team team = scoreboard.getTeam(teamName);
+
+        if (team == null) {
+            team = scoreboard.registerNewTeam(teamName);
+
+            team.setColor(color);
+            team.setSuffix(suffix);
+        }
+
+        team.addEntry(player.getName());
+    }
+
     public static void setTabListName(final Player player, final PlayerData data) {
-        final Component livesComp = Component.text(data.hasLastChance() ? " (Last Chance)" : " (" + data.getLives() + " lives)").decoration(TextDecoration.ITALIC, false).color(TextColor.color(128, 128, 128));
+        final String livesStr = data.hasLastChance() ? " (Last Chance)" : " (" + data.getLives() + " lives)";
+        final Component livesComp = Component.text(livesStr).decoration(TextDecoration.ITALIC, false).color(TextColor.color(128, 128, 128));
         final ColorManager.Colors colors = ColorManager.Colors.from(data.getLives());
+
+        setSuffix(player, data.getLives(), ChatColor.GRAY + livesStr);
 
         player.playerListName(player.name().color(colors.getRgb()).append(livesComp));
     }

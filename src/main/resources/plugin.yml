@@ -62,3 +62,9 @@ commands:
   preloadskins:
     permission: yggdrasil.preloadskins
     description: Preload all the skins in the plugin's data folder
+  togglenetherite:
+    permission: yggdrasil.togglenetherite
+    description: Toggle the ability to use the smithing table
+  togglescoreboard:
+    permission: yggdrasil.togglescoreboard
+    description: Toggle whether it will show player lives above head too

@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -36,6 +37,7 @@ public final class Yggdrasil extends JavaPlugin {
 
     public boolean isSessionRunning = false;
     public boolean isCullingSession = false;
+    private Scoreboard scoreboard;
 
     public SkinManager skinManager;
     private FileConfiguration config;
@@ -72,6 +74,9 @@ public final class Yggdrasil extends JavaPlugin {
             section.set("disabled", true);
         }
 
+        if (!this.config.contains("scoreboard_enabled"))
+            this.config.set("scoreboard_enabled", true);
+
         this.saveConfig();
     }
 
@@ -94,6 +99,7 @@ public final class Yggdrasil extends JavaPlugin {
         registerEvent(new TrapListeners(this));
         registerEvent(new PlayerItemDropListener(this));
         registerEvent(new PlayerItemPickupListener(this));
+        registerEvent(new NetheriteCraftListener(this));
 
         registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this)));
         registerCommand("addlives", new CommandWrapper(new AddLivesCommand(this)));
@@ -110,6 +116,8 @@ public final class Yggdrasil extends JavaPlugin {
         registerCommand("togglechat", new CommandWrapper(new ToggleChatCommand(this)));
         registerCommand("wipelives", new CommandWrapper(new WipeLivesCommand(this), false, false, true));
         registerCommand("preloadskins", new CommandWrapper(new PreloadSkinsCommand(this), false, false, false));
+        registerCommand("togglenetherite", new CommandWrapper(new ToggleNetheriteCommand(this)));
+        registerCommand("togglescoreboard", new CommandWrapper(new ToggleScoreboardCommand(this)));
 
         this.initPlaceholders();
         this.loadBot();
@@ -224,5 +232,13 @@ public final class Yggdrasil extends JavaPlugin {
         return boogeyManPool.stream()
                 .limit(boogeyMen)
                 .collect(Collectors.toList());
+    }
+
+    public Scoreboard getScoreboard() {
+        return this.scoreboard;
+    }
+
+    public void setScoreboard(final Scoreboard scoreboard) {
+        this.scoreboard = scoreboard;
     }
 }

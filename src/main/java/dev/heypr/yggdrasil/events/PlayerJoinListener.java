@@ -1,6 +1,7 @@
 package dev.heypr.yggdrasil.events;
 
 import dev.heypr.yggdrasil.Yggdrasil;
+import dev.heypr.yggdrasil.commands.impl.ToggleScoreboardCommand;
 import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.misc.ColorManager;
 import org.bukkit.Bukkit;
@@ -24,6 +25,13 @@ public class PlayerJoinListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+
+        if (ToggleScoreboardCommand.isEnabled()) {
+            if (plugin.getScoreboard() == null)
+                plugin.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+
+            player.setScoreboard(plugin.getScoreboard());
+        }
 
         if (!plugin.isSessionRunning) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> player.setGameMode(GameMode.ADVENTURE), 10L);

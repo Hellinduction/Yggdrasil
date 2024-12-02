@@ -38,7 +38,7 @@ public class PlayerData {
         this.lastChance = false;
         this.kills = 0;
 
-        this.update(-1);
+        this.update(Integer.MIN_VALUE);
     }
 
     public boolean isDead() {
@@ -133,7 +133,7 @@ public class PlayerData {
     }
 
     private void fixPlayerData(final Player player) {
-        ColorManager.setTabListName(player, this); // Set their lives to display again (setting skin messes it up)
+        this.updateColor(); // Set their lives to display again (setting skin messes it up)
 
         if (player.getGameMode() == GameMode.SPECTATOR) {
             player.setGameMode(GameMode.SURVIVAL);
@@ -233,7 +233,9 @@ public class PlayerData {
             return;
 
         this.saveLives();
-        this.updateSkin();
+
+        if (previousLives != Integer.MIN_VALUE)
+            this.updateSkin();
 
         if (this.lives > 0 && this.lastChance)
             this.lastChance = false;
@@ -286,13 +288,13 @@ public class PlayerData {
         final Player player = this.getPlayer();
         final Yggdrasil plugin = Yggdrasil.plugin;
 
-        if (player == null)
+        if (player == null || !player.isOnline())
             return;
 
         player.sendTitle(ChatColor.GRAY + "You will have...", "", 10, 20, 10);
 
         new BukkitRunnable() {
-            int e = randomizer ? 5 : 0;
+            int e = randomizer ? 15 : 0;
 
             @Override
             public void run() {
@@ -311,7 +313,8 @@ public class PlayerData {
                             "",
                             10, 20, 10);
 
-                    ColorManager.setTabListName(player, plugin.getPlayerData().get(player.getUniqueId()));
+                    updateColor();
+                    updateSkin();
                     cancel();
                 }
             }
