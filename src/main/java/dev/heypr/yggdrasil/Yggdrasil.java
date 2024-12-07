@@ -161,7 +161,8 @@ public final class Yggdrasil extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        Bot.bot.shutdownNow();
+        if (Bot.bot != null)
+            Bot.bot.shutdownNow();
     }
 
     public BukkitScheduler getScheduler() {

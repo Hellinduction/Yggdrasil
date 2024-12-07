@@ -153,7 +153,7 @@ public final class ColorManager {
         return skinFile;
     }
 
-    private static void setSuffix(final Player player, final int lives, final String suffix) {
+    private static void setSuffix(final Player player, final int lives) {
         final Scoreboard scoreboard = Yggdrasil.plugin.getScoreboard();
 
         if (scoreboard == null)
@@ -168,7 +168,6 @@ public final class ColorManager {
             team = scoreboard.registerNewTeam(teamName);
 
             team.setColor(color);
-            team.setSuffix(suffix);
         }
 
         team.addEntry(player.getName());
@@ -179,7 +178,7 @@ public final class ColorManager {
         final Component livesComp = Component.text(livesStr).decoration(TextDecoration.ITALIC, false).color(TextColor.color(128, 128, 128));
         final ColorManager.Colors colors = ColorManager.Colors.from(data.getLives());
 
-        setSuffix(player, data.getLives(), ChatColor.GRAY + livesStr);
+        setSuffix(player, data.getLives());
 
         player.playerListName(player.name().color(colors.getRgb()).append(livesComp));
     }
