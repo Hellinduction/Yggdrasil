@@ -56,6 +56,10 @@ public final class ColorManager {
 
             return null;
         }
+
+        public String getRoleName() {
+            return this.name().toLowerCase();
+        }
     }
 
     public static ChatColor getColor(int lives) {
@@ -130,7 +134,7 @@ public final class ColorManager {
         if (!userFolder.exists() || !userFolder.isDirectory())
             return null;
 
-        final String colorName = colors.name().toLowerCase().replace("dark_", "");
+        final String colorName = colors.getRoleName().replace("dark_", "");
         final File skinFile = new File(userFolder, colorName + ".png");
         final Predicate<File> exists = file -> file != null && file.exists();
 
@@ -139,7 +143,7 @@ public final class ColorManager {
                 final File greenSkinFile = getSkinFile(plugin, player, Colors.GREEN);
 
                 if (exists.test(greenSkinFile)) {
-                    final File saveTo = new File(userFolder, Colors.GRAY.name().toLowerCase() + ".png");
+                    final File saveTo = new File(userFolder, Colors.GRAY.getRoleName() + ".png");
 
                     grayScalePng(greenSkinFile, saveTo);
 

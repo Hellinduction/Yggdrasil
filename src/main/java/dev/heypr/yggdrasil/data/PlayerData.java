@@ -167,7 +167,7 @@ public class PlayerData {
             if (colors == exclude)
                 continue;
 
-            final String roleName = colors.name().toLowerCase();
+            final String roleName = colors.getRoleName();
             final String id = rolesSection.getString(roleName);
             final Role role = guild.getRoleById(id);
 
@@ -183,7 +183,7 @@ public class PlayerData {
 
     private void updateDiscordColor() {
         final ColorManager.Colors colors = ColorManager.Colors.from(this.lives);
-        final String roleName = colors.name().toLowerCase();
+        final String roleName = colors.getRoleName();
         final LinkCommand command = CommandManager.getCommand("link");
         final ConfigurationSection section = command.getUserSection(this.uuid);
 

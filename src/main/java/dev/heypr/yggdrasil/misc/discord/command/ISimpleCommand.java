@@ -12,4 +12,8 @@ public interface ISimpleCommand {
     default CommandData getData() {
         return Commands.slash(this.name(), this.description());
     }
+
+    default boolean requireAdmin() {
+        return false;
+    }
 }

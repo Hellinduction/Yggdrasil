@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -21,7 +22,7 @@ public final class EventListener extends ListenerAdapter {
 
     private void createRole(final Guild guild, final ColorManager.Colors colors, final Consumer<Role> roleConsumer) {
         final ConfigurationSection rolesSection = getRoles(guild.getId());
-        final String name = colors.name().toLowerCase();
+        final String name = colors.getRoleName();
         final boolean exists = rolesSection != null && rolesSection.contains(name);
 
         if (!exists) {
@@ -71,9 +72,14 @@ public final class EventListener extends ListenerAdapter {
             section = section.getConfigurationSection("roles");
 
         final ConfigurationSection finalSection = section;
+        final Role botRole = guild.getSelfMember().getRoles().stream()
+                .max(Comparator.comparingInt(Role::getPosition))
+                .orElse(null);
+
+        long delay = 20L;
 
         for (final ColorManager.Colors colors : ColorManager.Colors.values()) {
-            final String roleName = colors.name().toLowerCase();
+            final String roleName = colors.getRoleName();
 
             if (!finalSection.contains(roleName) && !guild.getRolesByName(roleName, false).isEmpty()) {
                 final Role role = guild.getRolesByName(roleName, false).get(0);
@@ -82,10 +88,30 @@ public final class EventListener extends ListenerAdapter {
                 continue;
             }
 
+            final long finalDelay = delay;
+
             this.createRole(guild, colors, role -> Yggdrasil.plugin.getScheduler().runTask(Yggdrasil.plugin, () -> {
                 finalSection.set(roleName, role.getId());
                 Yggdrasil.plugin.saveConfig();
+
+                Yggdrasil.plugin.getScheduler().runTaskLater(Yggdrasil.plugin, () -> {
+                    Role lastRole = colors == ColorManager.Colors.DARK_GREEN ? botRole : null;
+
+                    if (lastRole == null) {
+                        final ColorManager.Colors prevColors = ColorManager.Colors.values()[colors.ordinal() - 1];
+                        String prevId = null;
+
+                        if (finalSection.contains(prevColors.getRoleName()))
+                            prevId = finalSection.getString(prevColors.getRoleName());
+
+                        lastRole = prevId != null ? guild.getRoleById(prevId) : guild.getRolesByName(prevColors.getRoleName(), false).get(0);
+                    }
+
+                    guild.modifyRolePositions().selectPosition(role).moveBelow(lastRole).queue();
+                }, finalDelay);
             }));
+
+            delay += 20L;
         }
     }
 

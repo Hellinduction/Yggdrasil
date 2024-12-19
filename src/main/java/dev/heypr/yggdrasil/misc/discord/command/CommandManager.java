@@ -1,8 +1,10 @@
 package dev.heypr.yggdrasil.misc.discord.command;
 
 import dev.heypr.yggdrasil.misc.discord.BotUtils;
+import dev.heypr.yggdrasil.misc.discord.command.impl.DeleteRolesCommand;
 import dev.heypr.yggdrasil.misc.discord.command.impl.LinkCommand;
 import dev.heypr.yggdrasil.misc.discord.command.impl.LinkedCommand;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -17,6 +19,7 @@ public final class CommandManager {
     private static final List<ISimpleCommand> commands = new ArrayList<>();
 
     public static void registerCommands() {
+        registerCommand(new DeleteRolesCommand());
         registerCommand(new LinkCommand());
         registerCommand(new LinkedCommand());
     }
@@ -48,7 +51,8 @@ public final class CommandManager {
             if (cmd == null)
                 return;
 
-            final Response response = cmd.execute(e);
+            final boolean noPermission = cmd.requireAdmin() && !e.getMember().hasPermission(Permission.ADMINISTRATOR);
+            final Response response = noPermission ? Response.ResponseBuilder.response("You do not have permission to use this command.").setType(ResponseType.ERROR).build() : cmd.execute(e);
 
             if (response == null)
                 return;
