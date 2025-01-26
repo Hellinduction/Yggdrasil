@@ -101,7 +101,7 @@ public final class Yggdrasil extends JavaPlugin {
         registerEvent(new PlayerItemPickupListener(this));
         registerEvent(new NetheriteCraftListener(this));
 
-        registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this)));
+        registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this), true));
         registerCommand("addlives", new CommandWrapper(new AddLivesCommand(this)));
         registerCommand("lives", new CommandWrapper(new LivesCommand(this), true, true));
         registerCommand("removeboogeyman", new CommandWrapper(new RemoveBoogeymanCommand(this)));
