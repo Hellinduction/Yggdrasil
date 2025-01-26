@@ -38,7 +38,7 @@ For each player with a specific number of lives, the following images should be 
 - `red.png` for players with 1 life.
 
 It is also worth mentioning that it also supports a grayscaled version of the skin, however, this is automatically generated given that the green skin exists.
-Another important thing to note is that it is impossible for players below 2 lives to become boogeyman
+Another important thing to note is that it is impossible for players below 2 lives to become boogeyman.
 
 ## Placeholders
 
