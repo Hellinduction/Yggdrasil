@@ -31,6 +31,8 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
         if (players.isEmpty()) return true;
 
         for (final PlayerData data : playerData.values()) {
+            data.setRevealedData(false);
+
             if (data.isBoogeyman()) {
                 data.setBoogeyman(false);
 
@@ -38,8 +40,6 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
 
                 if (player != null && player.isOnline())
                     player.sendMessage(ChatColor.RED + "You have been cured! You are no longer the boogeyman.");
-
-                data.setRevealedData(false);
             }
         }
 
