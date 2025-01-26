@@ -26,6 +26,7 @@ import java.util.UUID;
 
 public class PlayerData {
     private UUID uuid;
+    private boolean revealedData = false;
     private int lives; // Persistent
     private boolean isBoogeyman;
     private boolean lastChance;
@@ -93,6 +94,14 @@ public class PlayerData {
 
     public int getLives() {
         return lives;
+    }
+
+    public boolean hasRevealedData() {
+        return revealedData;
+    }
+
+    public void setRevealedData(final boolean value) {
+        revealedData = value;
     }
 
     public void setLives(int amount) {
@@ -309,6 +318,7 @@ public class PlayerData {
                             "",
                             10, 20, 10);
 
+                    revealedData = true;
                     updateColor();
                     updateSkin();
                     cancel();

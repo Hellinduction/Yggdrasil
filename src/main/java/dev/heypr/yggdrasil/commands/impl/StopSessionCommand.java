@@ -41,6 +41,8 @@ public class StopSessionCommand implements CommandExecutor {
                 playerData.setLastChance(false);
                 playerData.checkLives();
             }
+
+            playerData.setRevealedData(false);
 //            Player player = plugin.getServer().getPlayer(uuid);
 
 //            NamespacedKey livesKey = new NamespacedKey(plugin, "lives");

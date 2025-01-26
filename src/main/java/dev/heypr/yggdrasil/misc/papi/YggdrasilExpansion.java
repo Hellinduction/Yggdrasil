@@ -34,6 +34,7 @@ public class YggdrasilExpansion extends PlaceholderExpansion {
         this.registerPlaceholder("kills", new KillsPlaceholder());
         this.registerPlaceholder("has_last_chance", new LastChancePlaceholder());
         this.registerPlaceholder("lives_color", new LivesColorPlaceholder());
+        this.registerPlaceholder("revealed_data", new RevealedDataPlaceholder());
     }
 
     private IPlaceholder getPlaceholder(final String placeholderStr) {
