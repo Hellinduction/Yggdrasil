@@ -37,7 +37,7 @@ For each player with a specific number of lives, the following images should be 
 - `yellow.png` for players with 2 lives.
 - `red.png` for players with 1 life.
 
-It it also worth mentioning that it also supports a grayscaled version of the skin, however, this is automatically generated given that the green skin exists.
+It is also worth mentioning that it also supports a grayscaled version of the skin, however, this is automatically generated given that the green skin exists.
 
 ## Placeholders
 
