@@ -46,3 +46,4 @@ It it also worth mentioning that it also supports a grayscaled version of the sk
 - `%yggdrasil_kills%`
 - `%yggdrasil_has_last_chance%`
 - `%yggdrasil_lives_color%`
+- `%yggdrasil_revealed_data%`
