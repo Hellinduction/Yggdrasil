@@ -38,6 +38,8 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
 
                 if (player != null && player.isOnline())
                     player.sendMessage(ChatColor.RED + "You have been cured! You are no longer the boogeyman.");
+
+                data.setRevealedData(false);
             }
         }
 
