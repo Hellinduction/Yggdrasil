@@ -318,7 +318,6 @@ public class PlayerData {
                             "",
                             10, 20, 10);
 
-                    revealedData = true;
                     updateColor();
                     updateSkin();
                     cancel();

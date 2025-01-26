@@ -49,6 +49,8 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
             playerData.putIfAbsent(boogeyman.getUniqueId(), new PlayerData(boogeyman.getUniqueId(), lives));
             playerData.get(boogeyman.getUniqueId()).setBoogeyman(true);
 
+            final PlayerData data = playerData.get(boogeyman.getUniqueId());
+
             plugin.getScheduler().runTaskLater(plugin, () -> {
                 boogeyman.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
                 plugin.getScheduler().runTaskLater(plugin, () -> {
@@ -62,6 +64,8 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
 
                                 boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou are the &6&lBoogeyman&4&l!!!"));
                                 boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&lRemember, as the &6&lBoogeyman&7&l your goal is to kill 1 player during this session."));
+
+                                data.setRevealedData(true);
                             }, 60L);
                         }, 20L);
                     }, 20L);
@@ -76,6 +80,7 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
                     playerData.putIfAbsent(player.getUniqueId(), new PlayerData(player.getUniqueId(), lives));
 
                     final boolean showTitle = plugin.isCullingSession || PlayerData.retrieveLives(player.getUniqueId()) != 0;
+                    final PlayerData data = playerData.get(player.getUniqueId());
 
                     if (showTitle) {
                         player.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
@@ -87,6 +92,8 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
                                     player.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
                                     plugin.getScheduler().runTaskLater(plugin, () -> {
                                         player.sendTitle(ChatColor.GREEN + "NOT THE BOOGEYMAN!", "", 10, 70, 20);
+
+                                        data.setRevealedData(true);
                                     }, 60L);
                                 }, 20L);
                             }, 20L);

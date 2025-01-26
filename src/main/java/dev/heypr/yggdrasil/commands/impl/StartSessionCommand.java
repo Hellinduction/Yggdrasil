@@ -73,6 +73,8 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
 
                                 boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou are the &6&lBoogeyman&4&l!!!"));
                                 boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&lRemember, as the &6&lBoogeyman&7&l your goal is to kill 1 &c&lnon-red&7&l name during this session."));
+
+                                data.setRevealedData(true);
                             }, 60L);
                         }, 20L);
                     }, 20L);
@@ -111,6 +113,8 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
                                     player.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
                                     plugin.getScheduler().runTaskLater(plugin, () -> {
                                         player.sendTitle(ChatColor.GREEN + "NOT THE BOOGEYMAN!", "", 10, 70, 20);
+
+                                        data.setRevealedData(true);
                                     }, 60L);
                                 }, 20L);
                             }, 20L);
