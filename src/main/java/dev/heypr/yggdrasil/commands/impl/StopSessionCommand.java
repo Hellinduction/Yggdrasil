@@ -50,6 +50,8 @@ public class StopSessionCommand implements CommandExecutor {
 //            player.getPersistentDataContainer().set(livesKey, PersistentDataType.INTEGER, plugin.getPlayerData().get(player.getUniqueId()).getLives());
         });
 
+        Yggdrasil.plugin.cancelTasks(Yggdrasil.plugin.getCancelOnSessionStop());
+
         plugin.isSessionRunning = false;
         return true;
     }

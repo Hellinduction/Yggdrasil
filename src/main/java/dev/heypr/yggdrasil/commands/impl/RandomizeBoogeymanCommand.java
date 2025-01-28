@@ -53,31 +53,31 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
 
             final PlayerData data = playerData.get(boogeyman.getUniqueId());
 
-            plugin.getScheduler().runTaskLater(plugin, () -> {
+            plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                 boogeyman.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
-                plugin.getScheduler().runTaskLater(plugin, () -> {
+                plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                     boogeyman.sendTitle(ChatColor.YELLOW + "2", "", 10, 20, 10);
-                    plugin.getScheduler().runTaskLater(plugin, () -> {
+                    plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                         boogeyman.sendTitle(ChatColor.RED + "1", "", 10, 20, 10);
-                        plugin.getScheduler().runTaskLater(plugin, () -> {
+                        plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                             boogeyman.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
-                            plugin.getScheduler().runTaskLater(plugin, () -> {
+                            plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                                 boogeyman.sendTitle(ChatColor.RED + "THE BOOGEYMAN!", "", 10, 70, 20);
 
                                 boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou are the &6&lBoogeyman&4&l!!!"));
                                 boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&lRemember, as the &6&lBoogeyman&7&l your goal is to kill 1 player during this session."));
 
                                 data.setRevealedData(true);
-                            }, 60L);
-                        }, 20L);
-                    }, 20L);
-                }, 20L);
-            }, 40L);
+                            }, 60L, true);
+                        }, 20L, true);
+                    }, 20L, true);
+                }, 20L, true);
+            }, 40L, true);
         }
 
         players.forEach(player -> {
             if (!playerData.get(player.getUniqueId()).isBoogeyman()) {
-                plugin.getScheduler().runTaskLater(plugin, () -> {
+                plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                     final int lives = PlayerData.retrieveLivesOrDefault(player.getUniqueId(), plugin.randomNumber(2, 6));
                     playerData.putIfAbsent(player.getUniqueId(), new PlayerData(player.getUniqueId(), lives));
 
@@ -86,22 +86,22 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
 
                     if (showTitle) {
                         player.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
-                        plugin.getScheduler().runTaskLater(plugin, () -> {
+                        plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                             player.sendTitle(ChatColor.YELLOW + "2", "", 10, 20, 10);
-                            plugin.getScheduler().runTaskLater(plugin, () -> {
+                            plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                                 player.sendTitle(ChatColor.RED + "1", "", 10, 20, 10);
-                                plugin.getScheduler().runTaskLater(plugin, () -> {
+                                plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                                     player.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
-                                    plugin.getScheduler().runTaskLater(plugin, () -> {
+                                    plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                                         player.sendTitle(ChatColor.GREEN + "NOT THE BOOGEYMAN!", "", 10, 70, 20);
 
                                         data.setRevealedData(true);
-                                    }, 60L);
-                                }, 20L);
-                            }, 20L);
-                        }, 20L);
+                                    }, 60L, true);
+                                }, 20L, true);
+                            }, 20L, true);
+                        }, 20L, true);
                     }
-                }, 40L);
+                }, 40L, true);
             }
         });
 

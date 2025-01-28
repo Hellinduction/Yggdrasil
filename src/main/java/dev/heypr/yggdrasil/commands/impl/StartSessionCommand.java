@@ -60,26 +60,26 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
 
             data.displayLives(pair.getValue());
 
-            plugin.getScheduler().runTaskLater(plugin, () -> {
+            plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                 boogeyman.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
-                plugin.getScheduler().runTaskLater(plugin, () -> {
+                plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                     boogeyman.sendTitle(ChatColor.YELLOW + "2", "", 10, 20, 10);
-                    plugin.getScheduler().runTaskLater(plugin, () -> {
+                    plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                         boogeyman.sendTitle(ChatColor.RED + "1", "", 10, 20, 10);
-                        plugin.getScheduler().runTaskLater(plugin, () -> {
+                        plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                             boogeyman.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
-                            plugin.getScheduler().runTaskLater(plugin, () -> {
+                            plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                                 boogeyman.sendTitle(ChatColor.RED + "THE BOOGEYMAN!", "", 10, 70, 20);
 
                                 boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou are the &6&lBoogeyman&4&l!!!"));
                                 boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&lRemember, as the &6&lBoogeyman&7&l your goal is to kill 1 &c&lnon-red&7&l name during this session."));
 
                                 data.setRevealedData(true);
-                            }, 60L);
-                        }, 20L);
-                    }, 20L);
-                }, 20L);
-            }, 260L);
+                            }, 60L, true);
+                        }, 20L, true);
+                    }, 20L, true);
+                }, 20L, true);
+            }, 260L, true);
         }
 
         final List<Player> playerPool = players;
@@ -103,23 +103,23 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
                 final boolean showTitle = plugin.isCullingSession || PlayerData.retrieveLives(player.getUniqueId()) != 0;
 
                 if (showTitle) {
-                    plugin.getScheduler().runTaskLater(plugin, () -> {
+                    plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                         player.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
-                        plugin.getScheduler().runTaskLater(plugin, () -> {
+                        plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                             player.sendTitle(ChatColor.YELLOW + "2", "", 10, 20, 10);
-                            plugin.getScheduler().runTaskLater(plugin, () -> {
+                            plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                                 player.sendTitle(ChatColor.RED + "1", "", 10, 20, 10);
-                                plugin.getScheduler().runTaskLater(plugin, () -> {
+                                plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                                     player.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
-                                    plugin.getScheduler().runTaskLater(plugin, () -> {
+                                    plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
                                         player.sendTitle(ChatColor.GREEN + "NOT THE BOOGEYMAN!", "", 10, 70, 20);
 
                                         data.setRevealedData(true);
-                                    }, 60L);
-                                }, 20L);
-                            }, 20L);
-                        }, 20L);
-                    }, 260L);
+                                    }, 60L, true);
+                                }, 20L, true);
+                            }, 20L, true);
+                        }, 20L, true);
+                    }, 260L, true);
                 }
             }
         });

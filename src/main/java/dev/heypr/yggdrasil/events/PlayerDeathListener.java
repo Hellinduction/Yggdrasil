@@ -77,9 +77,9 @@ public class PlayerDeathListener implements Listener {
         if (data.hasLastChance())
             data.setLastChance(false);
 
-        if (data.getLives() == 0)
+        if (data.getLives() == -1) {
             return;
-        else if (data.getLives() == 1) {
+        } else if (data.getLives() == 1 || (data.getLives() == 0 && plugin.isCullingSession)) {
             player.getWorld().strikeLightningEffect(player.getLocation());
 
             if (keepInv) {
@@ -96,7 +96,7 @@ public class PlayerDeathListener implements Listener {
         }
 
         data.decreaseLives(1);
-        player.sendActionBar(Component.text("Lives: " + data.getLives()));
+        player.sendActionBar(Component.text("Lives: " + data.getDisplayLives()));
 
         ColorManager.setTabListName(player, data);
     }

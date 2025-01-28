@@ -34,14 +34,14 @@ public class PlayerJoinListener implements Listener {
         }
 
         if (!plugin.isSessionRunning) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> player.setGameMode(GameMode.ADVENTURE), 10L);
+            plugin.getScheduler().runTaskLater(plugin, () -> player.setGameMode(GameMode.ADVENTURE), 10L);
 
             player.sendTitle(ChatColor.RED + "Game not started", "Please wait for the game to start", 10, 70, 20);
             return;
         }
 
         if (!plugin.getPlayerData().containsKey(player.getUniqueId())) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> player.setGameMode(GameMode.ADVENTURE), 10L);
+            plugin.getScheduler().runTaskLater(plugin, () -> player.setGameMode(GameMode.ADVENTURE), 10L);
 
             player.sendTitle(ChatColor.RED + "Game in progress", ChatColor.RED + "You are not part of the game", 10, 70, 20);
             player.sendMessage(ChatColor.RED + "Game in progress. Request an admin to add you to the game using /addplayer <player>");
@@ -57,10 +57,10 @@ public class PlayerJoinListener implements Listener {
         final PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
 
         playerData.update(-1);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> playerData.checkLives(), 10L);
+        plugin.getSchedulerWrapper().runTaskLater(plugin, () -> playerData.checkLives(), 10L, true);
 
         ColorManager.setTabListName(player, plugin.getPlayerData().get(player.getUniqueId()));
 
-        plugin.getScheduler().runTaskLater(plugin, () -> ColorManager.setTabListName(player, plugin.getPlayerData().get(player.getUniqueId())), 20L); // To fix it incase the skin thing removes it
+        plugin.getSchedulerWrapper().runTaskLater(plugin, () -> ColorManager.setTabListName(player, plugin.getPlayerData().get(player.getUniqueId())), 20L, true); // To fix it incase the skin thing removes it
     }
 }

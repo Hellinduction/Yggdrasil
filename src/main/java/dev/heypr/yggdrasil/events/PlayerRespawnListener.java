@@ -40,7 +40,7 @@ public class PlayerRespawnListener implements Listener {
             UUID uuid = player.getUniqueId();
             PlayerData data = plugin.getPlayerData().get(uuid);
 
-            player.sendActionBar(Component.text("Lives: " + data.getLives()));
+            player.sendActionBar(Component.text("Lives: " + data.getDisplayLives()));
             data.checkLives();
         });
     }

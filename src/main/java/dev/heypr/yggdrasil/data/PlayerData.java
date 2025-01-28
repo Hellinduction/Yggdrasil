@@ -43,7 +43,7 @@ public class PlayerData {
     }
 
     public boolean isDead() {
-        if (this.lives != 0 || this.lastChance)
+        if (this.lives > 0 || (Yggdrasil.plugin.isCullingSession && !(this.lives < 0)))
             return false;
 
         return true;
@@ -96,11 +96,21 @@ public class PlayerData {
         return lives;
     }
 
+    public int getDisplayLives() {
+        return lives > -1 ? lives : 0;
+    }
+
     public boolean hasRevealedData() {
+        if (!Yggdrasil.plugin.isSessionRunning)
+            return false;
+
         return revealedData;
     }
 
     public void setRevealedData(final boolean value) {
+        if (!Yggdrasil.plugin.isSessionRunning)
+            return;
+
         revealedData = value;
     }
 
@@ -157,9 +167,9 @@ public class PlayerData {
         if (skinFile == null)
             return;
 
-        Yggdrasil.plugin.skinManager.skin(player, skinFile, success -> Yggdrasil.plugin.getScheduler().runTaskLater(Yggdrasil.plugin, () -> {
+        Yggdrasil.plugin.skinManager.skin(player, skinFile, success -> Yggdrasil.plugin.getSchedulerWrapper().runTaskLater(Yggdrasil.plugin, () -> {
             this.fixPlayerData(player);
-        }, 20L));
+        }, 20L, true));
     }
 
     private void removeOtherColorRoles(final Guild guild, final Member member, final ColorManager.Colors exclude) {
@@ -281,7 +291,7 @@ public class PlayerData {
             final Player player = this.getPlayer();
 
             if (player != null && player.isOnline())
-                player.sendMessage(ChatColor.GREEN + "You successfully got 3 killed, you have regained a life!");
+                player.sendMessage(ChatColor.GREEN + "You successfully got 3 kills, you have regained a life!");
         }
     }
 
@@ -314,7 +324,7 @@ public class PlayerData {
                 } else {
                     ChatColor color = ColorManager.getColor(lives);
 
-                    player.sendTitle(color + "" + lives + " lives",
+                    player.sendTitle(color + "" + getDisplayLives() + " lives",
                             "",
                             10, 20, 10);
 
@@ -333,7 +343,7 @@ public class PlayerData {
      */
     public static int retrieveLives(final UUID uuid) {
         if (!Yggdrasil.plugin.getConfig().contains(String.format("players.%s", uuid.toString())))
-            return -1;
+            return Integer.MIN_VALUE;
 
         final ConfigurationSection playerSection = Yggdrasil.plugin.getConfig().getConfigurationSection(String.format("players.%s", uuid));
         final int lives = playerSection.getInt("lives");
@@ -350,7 +360,7 @@ public class PlayerData {
     public static Pair<Integer, Boolean> retrieveLivesOrDefaultAsPair(final UUID uuid, final int defaultLives) {
         final int lives = retrieveLives(uuid);
 
-        if (lives <= -1)
+        if (lives == Integer.MIN_VALUE)
             return new Pair<>(defaultLives, true);
 
         return new Pair<>(lives, false);

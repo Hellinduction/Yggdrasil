@@ -51,6 +51,7 @@ public final class ColorManager {
                 case 1:
                     return Colors.RED;
                 case 0:
+                case -1:
                     return Colors.GRAY;
             }
 
@@ -178,7 +179,7 @@ public final class ColorManager {
     }
 
     public static void setTabListName(final Player player, final PlayerData data) {
-        final String livesStr = data.hasLastChance() ? " (Last Chance)" : " (" + data.getLives() + " lives)";
+        final String livesStr = data.hasLastChance() ? " (Last Chance)" : " (" + data.getDisplayLives() + " lives)";
         final Component livesComp = Component.text(livesStr).decoration(TextDecoration.ITALIC, false).color(TextColor.color(128, 128, 128));
         final ColorManager.Colors colors = ColorManager.Colors.from(data.getLives());
 

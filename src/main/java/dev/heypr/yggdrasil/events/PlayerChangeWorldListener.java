@@ -1,7 +1,6 @@
 package dev.heypr.yggdrasil.events;
 
 import dev.heypr.yggdrasil.Yggdrasil;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,6 +20,6 @@ public final class PlayerChangeWorldListener implements Listener {
         final Player player = e.getPlayer();
 
         if (!plugin.isSessionRunning || !plugin.getPlayerData().containsKey(player.getUniqueId()))
-            Bukkit.getScheduler().runTaskLater(plugin, () -> player.setGameMode(GameMode.ADVENTURE), 10L);
+            plugin.getScheduler().runTaskLater(plugin, () -> player.setGameMode(GameMode.ADVENTURE), 10L);
     }
 }

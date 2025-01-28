@@ -4,6 +4,7 @@ import dev.heypr.yggdrasil.commands.CommandWrapper;
 import dev.heypr.yggdrasil.commands.impl.*;
 import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.events.*;
+import dev.heypr.yggdrasil.misc.BukkitSchedulerWrapper;
 import dev.heypr.yggdrasil.misc.SkinManager;
 import dev.heypr.yggdrasil.misc.discord.Bot;
 import dev.heypr.yggdrasil.misc.object.SkinData;
@@ -20,10 +21,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,7 +40,10 @@ public final class Yggdrasil extends JavaPlugin {
 
     Map<UUID, PlayerData> playerData = new HashMap<>();
     List<Player> deadPlayers = new ArrayList<>();
+    List<BukkitTask> cancelOnShutdown = new ArrayList<>();
+    List<BukkitTask> cancelOnSessionStop = new ArrayList<>();
 
+    public BukkitScheduler schedulerWrapper;
     public boolean isSessionRunning = false;
     public boolean isCullingSession = false;
     private Scoreboard scoreboard;
@@ -83,6 +92,8 @@ public final class Yggdrasil extends JavaPlugin {
     @Override
     public void onEnable() {
         plugin = this;
+
+        this.schedulerWrapper = new BukkitSchedulerWrapper();
 
         ConfigurationSerialization.registerClass(SkinData.class);
 
@@ -163,10 +174,23 @@ public final class Yggdrasil extends JavaPlugin {
     public void onDisable() {
         if (Bot.bot != null)
             Bot.bot.shutdownNow();
+
+        this.cancelTasks(this.getCancelOnShutdown());
     }
 
-    public BukkitScheduler getScheduler() {
-        return this.plugin.getServer().getScheduler();
+    public void cancelTasks(final List<BukkitTask> tasks) {
+        for (final BukkitTask task : tasks) {
+            if (task != null)
+                task.cancel();
+        }
+    }
+
+    public <T extends BukkitScheduler> T getScheduler() {
+        return (T) this.schedulerWrapper;
+    }
+
+    public BukkitSchedulerWrapper getSchedulerWrapper() {
+        return this.getScheduler();
     }
 
     public Map<UUID, PlayerData> getPlayerData() {
@@ -175,6 +199,14 @@ public final class Yggdrasil extends JavaPlugin {
 
     public List<Player> getDeadPlayers() {
         return deadPlayers;
+    }
+
+    public List<BukkitTask> getCancelOnShutdown() {
+        return this.cancelOnShutdown;
+    }
+
+    public List<BukkitTask> getCancelOnSessionStop() {
+        return this.cancelOnSessionStop;
     }
 
     public void registerEvent(Listener listener) {
@@ -206,8 +238,10 @@ public final class Yggdrasil extends JavaPlugin {
      */
     private List<Player> getBoogeyManPool() {
         final List<Player> players = new ArrayList<>(plugin.getServer().getOnlinePlayers());
+        final boolean noOneAbove1Life = Yggdrasil.plugin.getPlayerData().entrySet().stream().allMatch(entry -> entry.getValue().getLives() <= 1);
+
         final List<Player> potentialBoogyMen = players.stream()
-                .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) != 0 && PlayerData.retrieveLives(player.getUniqueId()) != 1)
+                .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) > 0 && (PlayerData.retrieveLives(player.getUniqueId()) != 1 || noOneAbove1Life))
                 .collect(Collectors.toList());
 
         return potentialBoogyMen;
@@ -241,5 +275,17 @@ public final class Yggdrasil extends JavaPlugin {
 
     public void setScoreboard(final Scoreboard scoreboard) {
         this.scoreboard = scoreboard;
+    }
+
+    public static String hashFile(final File file) {
+        try {
+            final MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            final byte[] data = Files.readAllBytes(file.toPath());
+            digest.update(data);
+            final String checksum = new BigInteger(1, digest.digest()).toString(16);
+            return checksum;
+        } catch (final Exception exception) {
+            return null;
+        }
     }
 }

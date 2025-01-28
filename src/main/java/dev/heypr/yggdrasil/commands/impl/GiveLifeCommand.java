@@ -54,7 +54,7 @@ public class GiveLifeCommand implements CommandExecutor {
             int playerLives = plugin.getPlayerData().get(player.getUniqueId()).getLives();
             int targetLives = plugin.getPlayerData().get(target.getUniqueId()).getLives();
 
-            if (targetLives == 0) {
+            if (targetLives <= 0) {
                 sender.sendMessage(ChatColor.RED + "You cannot revive dead players.");
                 return true;
             }

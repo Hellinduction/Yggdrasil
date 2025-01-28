@@ -54,6 +54,9 @@ public class AddLivesCommand implements CommandExecutor {
                 return true;
             }
 
+            if (targetLives < 0 && !isSet)
+                amount = 2;
+
             final ChatColor color = ColorManager.getColor(amount);
 
             if (!isSet) {
@@ -64,7 +67,7 @@ public class AddLivesCommand implements CommandExecutor {
                 target.sendMessage(ChatColor.GREEN + "Your lives have been set to " + color + amount + ChatColor.GREEN + ".");
             }
 
-            boolean currentlyDead = targetLives == 0;
+            boolean currentlyDead = targetLives <= 0;
             boolean revival = isSet ? currentlyDead && amount > 0 : currentlyDead;
             PlayerData targetData = plugin.getPlayerData().get(target.getUniqueId());
 

@@ -179,10 +179,10 @@ public final class SkinManager {
         return skinData;
     }
 
-    private SkinData saveSkinData(final String value, final JSONObject dataObj) {
+    private SkinData saveSkinData(final String value, final JSONObject dataObj, final String fileHash) {
         final String newValue = dataObj.getString("value");
         final String signature = dataObj.getString("signature");
-        final SkinData data = new SkinData(newValue, signature);
+        final SkinData data = new SkinData(newValue, signature, fileHash);
 
         plugin.getScheduler().runTask(plugin, () -> {
             final ConfigurationSection section = plugin.getConfig().getConfigurationSection("skins.stored");
@@ -205,9 +205,10 @@ public final class SkinManager {
         try {
             String value = encodeSkinToBase64(file);
 
+            final String fileHash = Yggdrasil.hashFile(file);
             final SkinData saved = this.getSavedSkinData(value);
 
-            if (saved != null) {
+            if (saved != null && fileHash.equals(saved.getFileHash())) {
                 saved.setRetrievedFromSave(true);
                 callback.accept(saved, null);
                 return;
@@ -221,7 +222,7 @@ public final class SkinManager {
                             return;
                         }
 
-                        final SkinData data = this.saveSkinData(value, dataObj);
+                        final SkinData data = this.saveSkinData(value, dataObj, fileHash);
 
                         callback.accept(data, exception);
                     };
