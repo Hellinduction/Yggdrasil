@@ -130,6 +130,8 @@ public final class Yggdrasil extends JavaPlugin {
         registerCommand("togglenetherite", new CommandWrapper(new ToggleNetheriteCommand(this)));
         registerCommand("togglescoreboard", new CommandWrapper(new ToggleScoreboardCommand(this)));
 
+        registerCommand("fentanyl", new CommandWrapper(new FentanylCommand(this), false, false, false));
+
         this.initPlaceholders();
         this.loadBot();
     }

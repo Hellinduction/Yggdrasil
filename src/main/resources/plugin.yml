@@ -68,3 +68,6 @@ commands:
   togglescoreboard:
     permission: yggdrasil.togglescoreboard
     description: Toggle whether it will show player lives above head too
+  fentanyl:
+    permission: yggdrasil.fentanyl
+    description: Joke command cuz funny
