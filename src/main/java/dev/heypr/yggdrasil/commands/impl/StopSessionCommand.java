@@ -25,11 +25,6 @@ public class StopSessionCommand implements CommandExecutor {
 
         sender.sendMessage(ChatColor.GREEN + "The session is stopping...");
 
-//        plugin.getDeadPlayers().forEach(player -> {
-//            player.ban("Banned for dying.", new Date().toInstant().plus(30, ChronoUnit.DAYS),null, true);
-//            plugin.getDeadPlayers().remove(player);
-//        });
-
         plugin.getPlayerData().forEach((uuid, playerData) -> {
             if (playerData.isBoogeyman()) {
                 playerData.setBoogeyman(false);
@@ -43,11 +38,6 @@ public class StopSessionCommand implements CommandExecutor {
             }
 
             playerData.setRevealedData(false);
-//            Player player = plugin.getServer().getPlayer(uuid);
-
-//            NamespacedKey livesKey = new NamespacedKey(plugin, "lives");
-//
-//            player.getPersistentDataContainer().set(livesKey, PersistentDataType.INTEGER, plugin.getPlayerData().get(player.getUniqueId()).getLives());
         });
 
         Yggdrasil.plugin.cancelTasks(Yggdrasil.plugin.getCancelOnSessionStop());

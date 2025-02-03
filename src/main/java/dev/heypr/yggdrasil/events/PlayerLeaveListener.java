@@ -29,11 +29,5 @@ public class PlayerLeaveListener implements Listener {
             });
             return;
         }
-
-//        NamespacedKey livesKey = new NamespacedKey(plugin, "lives");
-//        NamespacedKey boogeymanKey = new NamespacedKey(plugin, "boogeyman");
-//
-//        player.getPersistentDataContainer().set(livesKey, PersistentDataType.INTEGER, plugin.getPlayerData().get(player.getUniqueId()).getLives());
-//        player.getPersistentDataContainer().set(boogeymanKey, PersistentDataType.BOOLEAN, plugin.getPlayerData().get(player.getUniqueId()).isBoogeyman());
     }
 }
