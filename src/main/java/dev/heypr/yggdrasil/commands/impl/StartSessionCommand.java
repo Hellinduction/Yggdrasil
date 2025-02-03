@@ -2,6 +2,7 @@ package dev.heypr.yggdrasil.commands.impl;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.data.PlayerData;
+import dev.heypr.yggdrasil.data.TemporaryPlayerData;
 import dev.heypr.yggdrasil.misc.object.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -11,6 +12,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,7 +94,13 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
 
             playerData.putIfAbsent(player.getUniqueId(), data);
             player.setGameMode(GameMode.SURVIVAL);
+
             player.clearActivePotionEffects();
+
+            final TemporaryPlayerData temporaryPlayerData = TemporaryPlayerData.get(player);
+
+            for (final PotionEffect effect : temporaryPlayerData.getEffects())
+                player.addPotionEffect(effect);
 
             if (plugin.isCullingSession && PlayerData.retrieveLives(player.getUniqueId()) == 0)
                 data.setLastChance(true);

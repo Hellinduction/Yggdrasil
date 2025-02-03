@@ -3,6 +3,7 @@ package dev.heypr.yggdrasil.events;
 import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.commands.impl.ToggleScoreboardCommand;
 import dev.heypr.yggdrasil.data.PlayerData;
+import dev.heypr.yggdrasil.data.TemporaryPlayerData;
 import dev.heypr.yggdrasil.misc.ColorManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -14,6 +15,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class PlayerJoinListener implements Listener {
 
@@ -38,8 +42,15 @@ public class PlayerJoinListener implements Listener {
         if (!plugin.isSessionRunning) {
             plugin.getScheduler().runTaskLater(plugin, () ->  {
                 player.setGameMode(GameMode.ADVENTURE);
+
+                final Collection<PotionEffect> originalEffects = new ArrayList<>(player.getActivePotionEffects());
+                final TemporaryPlayerData data = TemporaryPlayerData.get(player);
+
+                data.setEffects(originalEffects);
+
                 player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, PotionEffect.INFINITE_DURATION, 50, false, false));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, PotionEffect.INFINITE_DURATION, 50, false, false));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, PotionEffect.INFINITE_DURATION, 50, false, false));
             }, 10L);
 
             player.sendTitle(ChatColor.RED + "Game not started", "Please wait for the game to start", 10, 70, 20);
