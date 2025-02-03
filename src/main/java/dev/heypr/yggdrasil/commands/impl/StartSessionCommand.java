@@ -92,6 +92,7 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
 
             playerData.putIfAbsent(player.getUniqueId(), data);
             player.setGameMode(GameMode.SURVIVAL);
+            player.clearActivePotionEffects();
 
             if (plugin.isCullingSession && PlayerData.retrieveLives(player.getUniqueId()) == 0)
                 data.setLastChance(true);

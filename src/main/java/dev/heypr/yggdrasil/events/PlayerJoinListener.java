@@ -12,6 +12,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class PlayerJoinListener implements Listener {
 
@@ -34,7 +36,11 @@ public class PlayerJoinListener implements Listener {
         }
 
         if (!plugin.isSessionRunning) {
-            plugin.getScheduler().runTaskLater(plugin, () -> player.setGameMode(GameMode.ADVENTURE), 10L);
+            plugin.getScheduler().runTaskLater(plugin, () ->  {
+                player.setGameMode(GameMode.ADVENTURE);
+                player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, PotionEffect.INFINITE_DURATION, 50, false, false));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, PotionEffect.INFINITE_DURATION, 50, false, false));
+            }, 10L);
 
             player.sendTitle(ChatColor.RED + "Game not started", "Please wait for the game to start", 10, 70, 20);
             return;
