@@ -86,6 +86,21 @@ public final class Yggdrasil extends JavaPlugin {
         if (!this.config.contains("scoreboard_enabled"))
             this.config.set("scoreboard_enabled", true);
 
+        if (!this.config.contains("values")) {
+            section = this.config.createSection("values");
+
+            section.setComments("rand_lives_lower_bound", Arrays.asList("The random range for how many lives a player will recieve"));
+            section.set("rand_lives_lower_bound", 2);
+            section.set("rand_lives_upper_bound", 6);
+
+            section.setComments("rand_boogey_lower_bound", Arrays.asList("The random range for how many Boogeyman there are each session"));
+            section.set("rand_boogey_lower_bound", 1);
+            section.set("rand_boogey_upper_bound", 3);
+
+            section.setComments("min_lives_through_give_life_command", Arrays.asList("The minimum amount of lives a player can go down to after giving some of their lives away"));
+            section.set("min_lives_through_give_life_command", 1);
+        }
+
         this.saveConfig();
     }
 
@@ -227,6 +242,14 @@ public final class Yggdrasil extends JavaPlugin {
 
     public int randomNumber(int lower, int upper) {
         return (int) (Math.random() * (upper - lower + 1)) + lower;
+    }
+
+    public int randomLives() {
+        return this.randomNumber(config.getInt("values.rand_lives_lower_bound"), config.getInt("values.rand_lives_upper_bound"));
+    }
+
+    public int randomBoogeyMenCount() {
+        return this.randomNumber(config.getInt("values.rand_boogey_lower_bound"), config.getInt("values.rand_boogey_upper_bound"));
     }
 
     public TextComponent deserializeText(String text) {

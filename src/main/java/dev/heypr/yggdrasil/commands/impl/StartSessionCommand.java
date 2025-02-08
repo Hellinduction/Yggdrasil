@@ -49,11 +49,11 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        int numBoogeymen = plugin.randomNumber(1, 3);
+        int numBoogeymen = plugin.randomBoogeyMenCount();
         List<Player> boogeyMen = plugin.pickBoogeyMen(numBoogeymen);
 
         for (final Player boogeyman : boogeyMen) {
-            final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(boogeyman.getUniqueId(), plugin.randomNumber(2, 6));
+            final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(boogeyman.getUniqueId(), plugin.randomLives());
             final PlayerData data = new PlayerData(boogeyman.getUniqueId(), pair.getKey());
 
             playerData.put(boogeyman.getUniqueId(), data);
@@ -89,7 +89,7 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(ChatColor.GREEN + "The session is starting...");
 
         playerPool.forEach(player -> {
-            final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(player.getUniqueId(), plugin.randomNumber(2, 6));
+            final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(player.getUniqueId(), plugin.randomLives());
             final PlayerData data = new PlayerData(player.getUniqueId(), pair.getKey());
 
             playerData.putIfAbsent(player.getUniqueId(), data);

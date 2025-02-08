@@ -43,11 +43,11 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
             }
         }
 
-        int numBoogeymen = plugin.randomNumber(1, 3);
+        int numBoogeymen = plugin.randomBoogeyMenCount();
         List<Player> boogeyMen = plugin.pickBoogeyMen(numBoogeymen);
 
         for (final Player boogeyman : boogeyMen) {
-            final int lives = PlayerData.retrieveLivesOrDefault(boogeyman.getUniqueId(), plugin.randomNumber(2, 6));
+            final int lives = PlayerData.retrieveLivesOrDefault(boogeyman.getUniqueId(), plugin.randomLives());
             playerData.putIfAbsent(boogeyman.getUniqueId(), new PlayerData(boogeyman.getUniqueId(), lives));
             playerData.get(boogeyman.getUniqueId()).setBoogeyman(true);
 
@@ -78,7 +78,7 @@ public class RandomizeBoogeymanCommand implements CommandExecutor {
         players.forEach(player -> {
             if (!playerData.get(player.getUniqueId()).isBoogeyman()) {
                 plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
-                    final int lives = PlayerData.retrieveLivesOrDefault(player.getUniqueId(), plugin.randomNumber(2, 6));
+                    final int lives = PlayerData.retrieveLivesOrDefault(player.getUniqueId(), plugin.randomLives());
                     playerData.putIfAbsent(player.getUniqueId(), new PlayerData(player.getUniqueId(), lives));
 
                     final boolean showTitle = plugin.isCullingSession || PlayerData.retrieveLives(player.getUniqueId()) != 0;

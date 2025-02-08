@@ -64,7 +64,9 @@ public class GiveLifeCommand implements CommandExecutor {
                 return true;
             }
 
-            if (playerLives - amount < 2) {
+            final int minLives = plugin.getConfig().getInt("values.min_lives_through_give_life_command");
+
+            if (playerLives - amount < minLives) {
                 sender.sendMessage(ChatColor.RED + "You do not have enough lives or would die if you gave that many.");
                 return true;
             }

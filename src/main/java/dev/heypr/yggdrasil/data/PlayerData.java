@@ -314,7 +314,7 @@ public class PlayerData {
             @Override
             public void run() {
                 if (e > 0) {
-                    int lives = plugin.randomNumber(2, 6);
+                    int lives = plugin.randomLives();
                     ChatColor color = ColorManager.getColor(lives);
 
                     player.sendTitle(color + "" + lives,

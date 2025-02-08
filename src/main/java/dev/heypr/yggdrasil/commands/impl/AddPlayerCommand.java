@@ -40,7 +40,7 @@ public class AddPlayerCommand implements CommandExecutor {
             return true;
         }
 
-        final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(target.getUniqueId(), plugin.randomNumber(2, 6));
+        final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(target.getUniqueId(), plugin.randomLives());
         final PlayerData data = new PlayerData(target.getUniqueId(), pair.getKey());
         final boolean culling = plugin.isCullingSession && data.getLives() == 0;
 
