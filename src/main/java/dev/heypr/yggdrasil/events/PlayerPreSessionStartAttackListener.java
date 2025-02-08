@@ -2,8 +2,12 @@ package dev.heypr.yggdrasil.events;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 
 public class PlayerPreSessionStartAttackListener implements Listener {
 
@@ -19,5 +23,23 @@ public class PlayerPreSessionStartAttackListener implements Listener {
             event.getPlayer().sendMessage("The session has not started yet!");
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onMobTarget(final EntityTargetEvent e) {
+        if (!plugin.isSessionRunning)
+            e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onEntityDamage(final EntityDamageEvent e) {
+        if (!plugin.isSessionRunning && e.getEntity() instanceof Player)
+            e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onExplosionPrime(final ExplosionPrimeEvent e) {
+        if (!plugin.isSessionRunning)
+            e.setCancelled(true);
     }
 }

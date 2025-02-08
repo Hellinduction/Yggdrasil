@@ -46,6 +46,7 @@ public class PlayerJoinListener implements Listener {
                 final Collection<PotionEffect> originalEffects = new ArrayList<>(player.getActivePotionEffects());
                 final TemporaryPlayerData data = TemporaryPlayerData.get(player);
 
+                originalEffects.removeIf(effect -> effect.getDuration() == PotionEffect.INFINITE_DURATION);
                 data.setEffects(originalEffects);
 
                 player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, PotionEffect.INFINITE_DURATION, 50, false, false));
