@@ -45,7 +45,6 @@ public class AddLivesCommand implements CommandExecutor {
                 return true;
             }
 
-            Player player = (Player) sender;
             int targetLives = plugin.getPlayerData().get(target.getUniqueId()).getLives();
             boolean aboveMax = isSet ? amount > Yggdrasil.MAX_LIVES : targetLives + amount > Yggdrasil.MAX_LIVES;
 
@@ -60,10 +59,10 @@ public class AddLivesCommand implements CommandExecutor {
             final ChatColor color = ColorManager.getColor(amount);
 
             if (!isSet) {
-                player.sendMessage(ChatColor.GREEN + "You have given " + color + amount + ChatColor.GREEN + " lives to " + target.getName() + ".");
+                sender.sendMessage(ChatColor.GREEN + "You have given " + color + amount + ChatColor.GREEN + " lives to " + target.getName() + ".");
                 target.sendMessage(ChatColor.GREEN + "You have been given " + color + amount + ChatColor.GREEN + " lives.");
             } else {
-                player.sendMessage(ChatColor.GREEN + "You have set the lives of " + target.getName() + " to " + color + amount + ChatColor.GREEN + ".");
+                sender.sendMessage(ChatColor.GREEN + "You have set the lives of " + target.getName() + " to " + color + amount + ChatColor.GREEN + ".");
                 target.sendMessage(ChatColor.GREEN + "Your lives have been set to " + color + amount + ChatColor.GREEN + ".");
             }
 
