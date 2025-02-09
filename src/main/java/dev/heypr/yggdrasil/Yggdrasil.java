@@ -264,10 +264,9 @@ public final class Yggdrasil extends JavaPlugin {
      */
     private List<Player> getBoogeyManPool() {
         final List<Player> players = new ArrayList<>(plugin.getServer().getOnlinePlayers());
-        final boolean noOneAbove1Life = Yggdrasil.plugin.getPlayerData().entrySet().stream().allMatch(entry -> entry.getValue().getLives() <= 1);
 
         final List<Player> potentialBoogyMen = players.stream()
-                .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) > 0 && (PlayerData.retrieveLives(player.getUniqueId()) != 1 || noOneAbove1Life))
+                .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) > 1)
                 .collect(Collectors.toList());
 
         return potentialBoogyMen;
