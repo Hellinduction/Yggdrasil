@@ -300,6 +300,10 @@ public class PlayerData {
     }
 
     public void displayLives(final boolean randomizer) {
+        this.displayLives(randomizer, false);
+    }
+
+    public void displayLives(final boolean randomizer, final boolean addPlayer) {
         final Player player = this.getPlayer();
         final Yggdrasil plugin = Yggdrasil.plugin;
 
@@ -331,6 +335,9 @@ public class PlayerData {
                     updateColor();
                     updateSkin();
                     cancel();
+
+                    if (addPlayer)
+                        revealedData = true;
                 }
             }
         }.runTaskTimer(plugin, 40L, 5L);

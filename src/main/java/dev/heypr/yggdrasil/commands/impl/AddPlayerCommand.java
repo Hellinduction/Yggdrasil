@@ -62,7 +62,7 @@ public class AddPlayerCommand implements CommandExecutor {
             plugin.getPlayerData().putIfAbsent(target.getUniqueId(), data);
 
             data.checkLives();
-            data.displayLives(pair.getValue());
+            data.displayLives(pair.getValue(), true);
         }
 
         sender.sendMessage(ChatColor.GREEN + "Player " + target.getName() + " added.");
