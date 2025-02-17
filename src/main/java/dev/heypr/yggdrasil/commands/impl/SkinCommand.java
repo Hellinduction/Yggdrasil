@@ -37,7 +37,7 @@ public final class SkinCommand implements CommandExecutor {
             return true;
         }
 
-        plugin.skinManager.skin(player, skinFile, null, exception -> {
+        plugin.skinManager.skin(player, skinFile, null, null, exception -> {
             if (exception == null)
                 sender.sendMessage(ChatColor.GREEN + String.format("Successfully changed your skin to the file '%s'.", skinFile.getPath()));
             else

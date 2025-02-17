@@ -7,6 +7,7 @@ import dev.heypr.yggdrasil.misc.object.SkinData;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.level.ServerPlayer;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -29,9 +30,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -179,21 +185,76 @@ public final class SkinManager {
         return skinData;
     }
 
-    private SkinData saveSkinData(final String value, final JSONObject dataObj, final String fileHash) {
-        final String newValue = dataObj.getString("value");
-        final String signature = dataObj.getString("signature");
-        final SkinData data = new SkinData(newValue, signature, fileHash);
-
+    private void saveSkinData(final String value, final SkinData data) {
         plugin.getScheduler().runTask(plugin, () -> {
             final ConfigurationSection section = plugin.getConfig().getConfigurationSection("skins.stored");
 
             section.set(value, data);
             plugin.saveConfig();
         });
+    }
+
+    private SkinData saveSkinData(final String value, final JSONObject dataObj, final String fileHash) {
+        final String newValue = dataObj.getString("value");
+        final String signature = dataObj.getString("signature");
+        final SkinData data = new SkinData(newValue, signature, fileHash);
+
+        this.saveSkinData(value, data);
 
         return data;
     }
 
+    /**
+     * Get skin data from players username
+     * @param username
+     * @param callback
+     */
+    public void getSkinData(final String username, final BiConsumer<SkinData, Exception> callback) {
+        Exception ex = null;
+
+        try {
+            final String value = Base64.getEncoder().encodeToString(username.getBytes());
+            final SkinData saved = this.getSavedSkinData(value);
+
+            if (saved != null) {
+                saved.setRetrievedFromSave(true);
+                callback.accept(saved, null);
+                return;
+            }
+
+            new Thread(() -> {
+                try {
+                    final URL url = new URL(String.format("https://api.ashcon.app/mojang/v2/user/%s", username));
+                    final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+                    conn.setRequestMethod("GET");
+
+                    final InputStream in = conn.getInputStream();
+                    final String json = new String(IOUtils.toString(in));
+                    in.close();
+
+                    final JSONObject obj = new JSONObject(json);
+                    final JSONObject skin = obj.getJSONObject("textures").getJSONObject("raw");
+
+                    final SkinData data = new SkinData(skin.getString("value"), skin.getString("signature"), null);
+
+                    callback.accept(data, null);
+                } catch (final Exception exception) {
+                    callback.accept(null, exception);
+                }
+            }).start();
+        } catch (final Exception exception) {
+            ex = exception;
+        }
+
+        callback.accept(null, ex);
+    }
+
+    /**
+     * Get skin data from a skin file
+     * @param file
+     * @param callback
+     */
     public void getSkinData(final File file, final BiConsumer<SkinData, Exception> callback) {
         if (!file.exists()) {
             callback.accept(null, null);
@@ -203,12 +264,12 @@ public final class SkinManager {
         Exception ex = null;
 
         try {
-            String value = encodeSkinToBase64(file);
+            final String value = encodeSkinToBase64(file);
 
             final String fileHash = Yggdrasil.hashFile(file);
             final SkinData saved = this.getSavedSkinData(value);
 
-            if (saved != null && fileHash.equals(saved.getFileHash())) {
+            if (saved != null && (saved.getFileHash() == null || fileHash.equals(saved.getFileHash()))) {
                 saved.setRetrievedFromSave(true);
                 callback.accept(saved, null);
                 return;
@@ -277,6 +338,19 @@ public final class SkinManager {
         return profile;
     }
 
+    private GameProfile updateNick(final GameProfile profile, final String name) throws ReflectiveOperationException {
+        final Field nameField = profile.getClass().getDeclaredField("name");
+        nameField.setAccessible(true);
+        nameField.set(profile, name);
+
+        return profile;
+    }
+
+    private GameProfile updateNick(final Player player, final String name) throws Exception {
+        final GameProfile profile = this.getProfile(player);
+        return this.updateNick(profile, name);
+    }
+
     private void updateSkinViaPackets(final Player player) throws Exception {
         final CraftPlayer craftPlayer = (CraftPlayer) player;
 
@@ -294,8 +368,11 @@ public final class SkinManager {
         craftPlayer.getHandle().connection.send(addPacket);
 
         ClientboundPlayerInfoUpdatePacket updatePacket = new ClientboundPlayerInfoUpdatePacket(
-                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED,
-                craftPlayer.getHandle()
+                EnumSet.of(
+                        ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED,
+                        ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME
+                ),
+                Arrays.asList(craftPlayer.getHandle())
         );
 
         craftPlayer.getHandle().connection.send(updatePacket);
@@ -317,12 +394,15 @@ public final class SkinManager {
             throw ex;
     }
 
-    private void skinInternal(final Player player, final SkinData skinData, final Consumer<Exception> exceptionConsumer) {
+    private void skinInternal(final Player player, final SkinData skinData, final String name, final Consumer<Exception> exceptionConsumer) {
         plugin.getScheduler().runTask(plugin, () -> {
             try {
                 this.refreshPlayer(player);
 
-                this.updateSkin(player, skinData);
+                final GameProfile profile = this.updateSkin(player, skinData);
+
+                if (name != null)
+                    this.updateNick(profile, name);
 
                 this.updateSkinViaPackets(player);
 
@@ -335,41 +415,81 @@ public final class SkinManager {
         });
     }
 
-    public void skin(final Player player, final File file) {
-        this.skin(player, file, null);
+    private void nickInternal(final Player player, final String name, final Consumer<Exception> exceptionConsumer) {
+        try {
+            this.refreshPlayer(player);
+            this.updateNick(player, name);
+            this.refreshPlayer(player);
+
+            exceptionConsumer.accept(null);
+        } catch (final Exception exception) {
+            exceptionConsumer.accept(exception);
+        }
+    }
+
+    private void skinInternal(final Player player, final SkinData skinData, final Consumer<Exception> exceptionConsumer) {
+        this.skinInternal(player, skinData, null, exceptionConsumer);
     }
 
     public void skin(final Player player, final File file, final Consumer<Boolean> callback) {
-        this.skin(player, file, callback, null);
+        this.skin(player, file, null, callback);
     }
 
-    public void skin(final Player player, final File file, final Consumer<Boolean> callback, final Consumer<Exception> exceptionConsumer) {
+    public void skin(final Player player, final File file, final String name, final Consumer<Boolean> callback) {
+        this.skin(player, file, name, callback, null);
+    }
+
+    public void skin(final Player player, final File file, final String name, final Consumer<Boolean> callback, final Consumer<Exception> exceptionConsumer) {
+        final Consumer<Exception> failure = ex -> Yggdrasil.plugin.getScheduler().runTask(Yggdrasil.plugin, () -> {
+            exceptionConsumer.accept(ex);
+
+            if (callback != null)
+                callback.accept(false); // Failed to set skin
+        });
+
         this.getSkinData(file, (data, exception) -> {
+            final Consumer<SkinData> success = d -> this.skinInternal(player, d, name, exception2 -> {
+                if (exceptionConsumer != null) {
+                    if (exception != null)
+                        exceptionConsumer.accept(exception);
+                    else if (exception2 != null)
+                        exceptionConsumer.accept(exception2);
+                    else
+                        exceptionConsumer.accept(null);
+                }
+
+                if (callback != null)
+                    callback.accept(true); // Likely succeeded to set skin
+            });
+
             if (exception != null && data == null && exceptionConsumer != null) {
-                Yggdrasil.plugin.getScheduler().runTask(Yggdrasil.plugin, () -> {
-                    exceptionConsumer.accept(exception);
-
-                    if (callback != null)
-                        callback.accept(false); // Failed to set skin
-                });
-
+                failure.accept(exception);
                 return;
             }
 
-            if (data != null)
-                this.skinInternal(player, data, exception2 -> {
-                    if (exceptionConsumer != null) {
-                        if (exception != null)
-                            exceptionConsumer.accept(exception);
-                        else if (exception2 != null)
-                            exceptionConsumer.accept(exception2);
-                        else
-                            exceptionConsumer.accept(null);
+            if (data == null && name != null) {
+                this.getSkinData(name, (d, ex) -> {
+                    if (ex != null && d == null && exceptionConsumer != null) {
+                        failure.accept(ex);
+                        return;
                     }
 
-                    if (callback != null)
-                        callback.accept(true); // Likely succeeded to set skin
+                    if (d != null)
+                        success.accept(d);
                 });
+            }
+
+            if (data != null)
+                success.accept(data);
         });
+    }
+
+    /**
+     * Used for only nicking the player
+     * @param player
+     * @param name
+     */
+    public void nick(final Player player, final String name, final Consumer<Exception> exceptionConsumer) {
+        this.nickInternal(player, name, exceptionConsumer);
     }
 }

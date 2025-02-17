@@ -56,16 +56,6 @@ public class AddLivesCommand implements CommandExecutor {
             if (targetLives < 0 && !isSet)
                 amount = 2;
 
-            final ChatColor color = ColorManager.getColor(amount);
-
-            if (!isSet) {
-                sender.sendMessage(ChatColor.GREEN + "You have given " + color + amount + ChatColor.GREEN + " lives to " + target.getName() + ".");
-                target.sendMessage(ChatColor.GREEN + "You have been given " + color + amount + ChatColor.GREEN + " lives.");
-            } else {
-                sender.sendMessage(ChatColor.GREEN + "You have set the lives of " + target.getName() + " to " + color + amount + ChatColor.GREEN + ".");
-                target.sendMessage(ChatColor.GREEN + "Your lives have been set to " + color + amount + ChatColor.GREEN + ".");
-            }
-
             boolean currentlyDead = targetLives <= 0;
             boolean revival = isSet ? currentlyDead && amount > 0 : currentlyDead;
             PlayerData targetData = plugin.getPlayerData().get(target.getUniqueId());
@@ -80,6 +70,16 @@ public class AddLivesCommand implements CommandExecutor {
             else {
                 targetData.addLives(amount);
                 targetData.checkLives();
+            }
+
+            final ChatColor color = ColorManager.getColor(amount);
+
+            if (!isSet) {
+                sender.sendMessage(ChatColor.GREEN + "You have given " + color + amount + ChatColor.GREEN + " lives to " + targetData.getDisplayName() + ".");
+                target.sendMessage(ChatColor.GREEN + "You have been given " + color + amount + ChatColor.GREEN + " lives.");
+            } else {
+                sender.sendMessage(ChatColor.GREEN + "You have set the lives of " + targetData.getDisplayName() + " to " + color + amount + ChatColor.GREEN + ".");
+                target.sendMessage(ChatColor.GREEN + "Your lives have been set to " + color + amount + ChatColor.GREEN + ".");
             }
             return true;
         }

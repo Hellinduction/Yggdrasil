@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.entities.User;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -23,17 +24,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class PlayerData {
     private UUID uuid;
+    private String username;
     private boolean revealedData = false;
     private int lives; // Persistent
     private boolean isBoogeyman;
     private boolean lastChance;
     private int kills;
 
-    public PlayerData(UUID uuid, int lives) {
+    public PlayerData(UUID uuid, String username, int lives) {
         this.uuid = uuid;
+        this.username = username;
         this.lives = lives;
         this.isBoogeyman = false;
         this.lastChance = false;
@@ -90,6 +94,39 @@ public class PlayerData {
 
     public UUID getUuid() {
         return uuid;
+    }
+
+    /**
+     * Returns this player's real username regardless of their disguise
+     * @return
+     */
+    public String getUsername() {
+        return this.username;
+    }
+
+    /**
+     * This will either just simply get their username, or their nickname with their username is brackets depending on whether they are nicked
+     * @return
+     */
+    public String getDisplayName() {
+        final PlayerData data = this.getDisguiseData();
+
+        if (data == null)
+            return this.getUsername();
+
+        return String.format("%s (%s)", data.getUsername(), this.getUsername());
+    }
+
+    public String getUsernameOrNick() {
+        final PlayerData data = this.getDisguiseData();
+
+        return data == null ? this.getUsername() : data.getUsername();
+    }
+
+    public boolean isOnline() {
+        final Player player = this.getPlayer();
+
+        return player != null && player.isOnline();
     }
 
     public int getLives() {
@@ -156,20 +193,53 @@ public class PlayerData {
         }
     }
 
+    private UUID getDisguise() {
+        return Yggdrasil.plugin.getDisguiseMap().get(this.uuid);
+    }
+
+    public OfflinePlayer getDisguisePlayer() {
+        final UUID uuid = this.getDisguise();
+        return uuid == null ? null : Bukkit.getOfflinePlayer(uuid);
+    }
+
+    public PlayerData getDisguiseData() {
+        final UUID uuid = this.getDisguise();
+        return uuid == null ? null : Yggdrasil.plugin.getPlayerData().get(uuid);
+    }
+
     private void updateSkin() {
         final Player player = this.getPlayer();
 
         if (player == null || !player.isOnline())
             return;
 
-        final File skinFile = ColorManager.getSkinFile(Yggdrasil.plugin, player, this);
+        final OfflinePlayer disguisedAs = this.getDisguisePlayer();
+        final PlayerData disguisedAsData = this.getDisguiseData();
+        final File skinFile = ColorManager.getSkinFile(Yggdrasil.plugin, disguisedAs == null ? player : disguisedAs, this);
 
         if (skinFile == null)
             return;
 
-        Yggdrasil.plugin.skinManager.skin(player, skinFile, success -> Yggdrasil.plugin.getSchedulerWrapper().runTaskLater(Yggdrasil.plugin, () -> {
-            this.fixPlayerData(player);
-        }, 20L, true));
+        Yggdrasil.plugin.skinManager.skin(player, skinFile, disguisedAsData == null ? null : disguisedAsData.getUsername(), success -> Yggdrasil.plugin.getSchedulerWrapper().runTaskLater(Yggdrasil.plugin, () -> this.fixPlayerData(player), 20L, true));
+    }
+
+    public String updateNick() {
+        final Player player = this.getPlayer();
+
+        if (player == null || !player.isOnline())
+            return null;
+
+        final PlayerData disguisedAs = this.getDisguiseData();
+
+        if (disguisedAs == null)
+            return null;
+
+        Yggdrasil.plugin.skinManager.nick(player, disguisedAs.getUsername(), exception -> {
+            if (exception != null)
+                exception.printStackTrace();
+        });
+
+        return disguisedAs.getUsername();
     }
 
     private void removeOtherColorRoles(final Guild guild, final Member member, final ColorManager.Colors exclude) {
@@ -390,5 +460,37 @@ public class PlayerData {
         Yggdrasil.plugin.saveConfig();
 
         return size;
+    }
+
+    public static PlayerData find(final Predicate<PlayerData> predicate) {
+        for (final PlayerData data : Yggdrasil.plugin.getPlayerData().values()) {
+            if (predicate.test(data))
+                return data;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get from the players real username
+     * @return
+     */
+    public static PlayerData fromUsername(final String username) {
+        if (username == null)
+            return null;
+
+        return find(data -> data.getUsername().equalsIgnoreCase(username));
+    }
+
+    public static PlayerData fromDisguiseName(final String disguiseName) {
+        if (disguiseName == null)
+            return null;
+
+        return find(data -> data.getDisguiseData() != null && data.getDisguiseData().getUsername().equalsIgnoreCase(disguiseName));
+    }
+
+    public static PlayerData fromUsernameOrDisguiseName(final String name) {
+        final PlayerData disguiseData = fromDisguiseName(name);
+        return disguiseData == null ? fromUsername(name) : disguiseData;
     }
 }

@@ -1,12 +1,11 @@
 package dev.heypr.yggdrasil.commands.impl;
 
 import dev.heypr.yggdrasil.Yggdrasil;
-import org.bukkit.Bukkit;
+import dev.heypr.yggdrasil.data.PlayerData;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.Collection;
 import java.util.List;
@@ -33,10 +32,11 @@ public final class ListBoogeyMenCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
-        final List<String> boogeyMen = Bukkit.getOnlinePlayers().stream()
-                .filter(player -> plugin.getPlayerData().containsKey(player.getUniqueId()) && plugin.getPlayerData().get(player.getUniqueId()).isBoogeyman())
-                .map(Player::getName)
+        final List<String> boogeyMen = plugin.getPlayerData().values().stream()
+                .filter(PlayerData::isBoogeyman)
+                .map(PlayerData::getDisplayName)
                 .collect(Collectors.toList());
+
         final String list = this.formatStringList(boogeyMen);
 
         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&7Boogeymen (%s): %s", boogeyMen.size(), list)));

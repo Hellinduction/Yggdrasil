@@ -71,3 +71,9 @@ commands:
   fentanyl:
     permission: yggdrasil.fentanyl
     description: Joke command cuz funny
+  shufflenames:
+    permission: yggdrasil.shufflenames
+    description: Swap everyone's name
+  realname:
+    permission: yggdrasil.realname
+    description: Get the real name of a player

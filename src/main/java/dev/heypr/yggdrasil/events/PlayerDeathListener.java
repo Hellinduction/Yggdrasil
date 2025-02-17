@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 public class PlayerDeathListener implements Listener {
 
     private final Yggdrasil plugin;
-//    private final Map<ItemStack, Long> protectedDrops = new HashMap<>();
 
     public PlayerDeathListener(Yggdrasil plugin) {
         this.plugin = plugin;
@@ -43,11 +42,6 @@ public class PlayerDeathListener implements Listener {
                 })
                 .collect(Collectors.toList());
         final boolean keepInv = player.getWorld().getGameRuleValue(GameRule.KEEP_INVENTORY).booleanValue() || player.getGameMode() == GameMode.SPECTATOR;
-
-//        event.setKeepInventory(true);
-//        event.setKeepLevel(true);
-//        event.setShouldDropExperience(false);
-//        event.getDrops().clear();
 
         if (!plugin.isSessionRunning)
             return; // No action taken since the session is not running
@@ -88,11 +82,6 @@ public class PlayerDeathListener implements Listener {
                 event.setShouldDropExperience(true);
                 event.getDrops().addAll(originalDrops);
             }
-
-//            final long now = Instant.now().getEpochSecond();
-//
-//            for (final ItemStack drop : event.getDrops())
-//                this.protectedDrops.put(drop, now);
         }
 
         data.decreaseLives(1);
@@ -100,30 +89,4 @@ public class PlayerDeathListener implements Listener {
 
         ColorManager.setTabListName(player, data);
     }
-
-//    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-//    public void onEntityDamage(final EntityDamageEvent e) {
-//        if (e.getCause() != EntityDamageEvent.DamageCause.LIGHTNING)
-//            return;
-//
-//        final Entity entity = e.getEntity();
-//
-//        if (!(entity instanceof Item item))
-//            return;
-//
-//        if (!this.protectedDrops.containsKey(item.getItemStack()))
-//            return;
-//
-//        final long now = Instant.now().getEpochSecond();
-//        final long then = this.protectedDrops.get(item.getItemStack());
-//        final long diff = now - then;
-//
-//        if (diff > 3) {
-//            this.protectedDrops.remove(item.getItemStack());
-//            return;
-//        }
-//
-//        e.setCancelled(true);
-//        this.protectedDrops.remove(item.getItemStack());
-//    }
 }

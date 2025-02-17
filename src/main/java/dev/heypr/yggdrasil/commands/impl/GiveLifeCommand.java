@@ -23,18 +23,19 @@ public class GiveLifeCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-
         if (args.length < 2) {
             sender.sendMessage(ChatColor.RED + "Usage: /givelife <player> <amount>");
             return true;
         }
 
-        Player target = sender.getServer().getPlayer(args[0]);
+        PlayerData targetData = PlayerData.fromUsernameOrDisguiseName(args[0]);
 
-        if (target == null) {
+        if (targetData == null || !targetData.isOnline()) {
             sender.sendMessage(ChatColor.RED + "Player not found.");
             return true;
         }
+
+        final Player target = targetData.getPlayer();
 
         if (args.length == 2) {
             int amount = Integer.parseInt(args[1]);
@@ -76,22 +77,18 @@ public class GiveLifeCommand implements CommandExecutor {
                 return true;
             }
 
-            final ChatColor color = ColorManager.getColor(amount);
-
-            player.sendMessage(ChatColor.GREEN + "You have given " + color + amount + ChatColor.GREEN + " lives to " + target.getName() + ".");
-            target.sendMessage(ChatColor.GREEN + "You have been given " + color + amount + ChatColor.GREEN + " lives.");
-
             final PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
-            final PlayerData targetData = plugin.getPlayerData().get(target.getUniqueId());
-
-//            if (targetLives == 0)
-//                targetData.revive();
 
             playerData.decreaseLives(amount);
             playerData.checkLives();
 
             targetData.addLives(amount);
             targetData.checkLives();
+
+            final ChatColor color = ColorManager.getColor(amount);
+
+            player.sendMessage(ChatColor.GREEN + "You have given " + color + amount + ChatColor.GREEN + " lives to " + targetData.getUsernameOrNick() + ".");
+            target.sendMessage(ChatColor.GREEN + "You have been given " + color + amount + ChatColor.GREEN + " lives.");
 
             return true;
         }

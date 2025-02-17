@@ -1,6 +1,7 @@
 package dev.heypr.yggdrasil.events;
 
 import dev.heypr.yggdrasil.Yggdrasil;
+import dev.heypr.yggdrasil.commands.impl.ShuffleNamesCommand;
 import dev.heypr.yggdrasil.commands.impl.ToggleScoreboardCommand;
 import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.data.TemporaryPlayerData;
@@ -27,10 +28,23 @@ public class PlayerJoinListener implements Listener {
         this.plugin = plugin;
     }
 
+    private void removeFormerlyKnownAs(final PlayerJoinEvent event) {
+        if (event.getJoinMessage() == null)
+            return;
+
+        if (!event.getJoinMessage().toLowerCase().contains("formerly known as"))
+            return;
+
+        event.setJoinMessage(event.getJoinMessage().replaceAll("\\s*\\(formerly known as .*?\\)", ""));
+    }
+
     @SuppressWarnings("all")
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
+        this.removeFormerlyKnownAs(event);
+
         Player player = event.getPlayer();
+        String originalUsername = player.getName();
 
         if (ToggleScoreboardCommand.isEnabled()) {
             if (plugin.getScoreboard() == null)
@@ -73,6 +87,13 @@ public class PlayerJoinListener implements Listener {
         }
 
         final PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
+
+        if (ShuffleNamesCommand.isEnabled()) {
+            final String username = playerData.updateNick();
+
+            if (username != null)
+                event.setJoinMessage(event.getJoinMessage().replace(originalUsername, username));
+        }
 
         playerData.update(-1);
         plugin.getSchedulerWrapper().runTaskLater(plugin, () -> playerData.checkLives(), 10L, true);

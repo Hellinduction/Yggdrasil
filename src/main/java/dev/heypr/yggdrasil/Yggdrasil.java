@@ -1,6 +1,7 @@
 package dev.heypr.yggdrasil;
 
 import dev.heypr.yggdrasil.commands.CommandWrapper;
+import dev.heypr.yggdrasil.commands.RealNameTabCompleter;
 import dev.heypr.yggdrasil.commands.impl.*;
 import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.events.*;
@@ -13,6 +14,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -42,6 +44,7 @@ public final class Yggdrasil extends JavaPlugin {
     List<Player> deadPlayers = new ArrayList<>();
     List<BukkitTask> cancelOnShutdown = new ArrayList<>();
     List<BukkitTask> cancelOnSessionStop = new ArrayList<>();
+    Map<UUID, UUID> disguiseMap = new HashMap<>();
 
     public BukkitScheduler schedulerWrapper;
     public boolean isSessionRunning = false;
@@ -127,10 +130,11 @@ public final class Yggdrasil extends JavaPlugin {
         registerEvent(new PlayerItemPickupListener(this));
         registerEvent(new NetheriteCraftListener(this));
         registerEvent(new PlayerPreSessionStartAttackListener(this));
+        registerEvent(new PlayerKickListener(this));
 
-        registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this), true, true));
+        registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this), true, true), new RealNameTabCompleter(this));
         registerCommand("addlives", new CommandWrapper(new AddLivesCommand(this)));
-        registerCommand("lives", new CommandWrapper(new LivesCommand(this), true, true));
+        registerCommand("lives", new CommandWrapper(new LivesCommand(this), true, true), new RealNameTabCompleter(this));
         registerCommand("removeboogeyman", new CommandWrapper(new RemoveBoogeymanCommand(this)));
         registerCommand("setboogeyman", new CommandWrapper(new SetBoogeymanCommand(this)));
         registerCommand("randomizeboogeyman", new CommandWrapper(new RandomizeBoogeymanCommand(this), true));
@@ -145,6 +149,8 @@ public final class Yggdrasil extends JavaPlugin {
         registerCommand("preloadskins", new CommandWrapper(new PreloadSkinsCommand(this), false, false, false));
         registerCommand("togglenetherite", new CommandWrapper(new ToggleNetheriteCommand(this)));
         registerCommand("togglescoreboard", new CommandWrapper(new ToggleScoreboardCommand(this)));
+        registerCommand("shufflenames", new CommandWrapper(new ShuffleNamesCommand(this), true));
+        registerCommand("realname", new CommandWrapper(new RealNameCommand(this), true), new RealNameTabCompleter(this));
 
         registerCommand("fentanyl", new CommandWrapper(new FentanylCommand(this), false, false, false));
 
@@ -215,6 +221,10 @@ public final class Yggdrasil extends JavaPlugin {
         return playerData;
     }
 
+    public Map<UUID, UUID> getDisguiseMap() {
+        return disguiseMap;
+    }
+
     public List<Player> getDeadPlayers() {
         return deadPlayers;
     }
@@ -232,12 +242,20 @@ public final class Yggdrasil extends JavaPlugin {
     }
 
     public void registerCommand(String command, CommandExecutor executor) {
-        getCommand(command).setExecutor(executor);
+        registerCommand(command, executor, null);
+    }
 
-        if (executor instanceof TabCompleter tabCompleter)
-            getCommand(command).setTabCompleter(tabCompleter);
-        else if (executor instanceof CommandWrapper wrapper && wrapper.getExecutor() instanceof TabCompleter tabCompleter)
-            getCommand(command).setTabCompleter(tabCompleter);
+    public void registerCommand(String command, CommandExecutor executor, TabCompleter tabCompleter) {
+        final PluginCommand pluginCommand = getCommand(command);
+
+        pluginCommand.setExecutor(executor);
+
+        if (tabCompleter != null)
+            pluginCommand.setTabCompleter(tabCompleter);
+        else if (executor instanceof TabCompleter completer)
+            pluginCommand.setTabCompleter(completer);
+        else if (executor instanceof CommandWrapper wrapper && wrapper.getExecutor() instanceof TabCompleter completer)
+            pluginCommand.setTabCompleter(completer);
     }
 
     public int randomNumber(int lower, int upper) {

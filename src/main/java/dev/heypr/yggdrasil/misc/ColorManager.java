@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -123,11 +124,11 @@ public final class ColorManager {
         }
     }
 
-    public static File getSkinFile(final Yggdrasil plugin, Player player, final PlayerData data) {
+    public static File getSkinFile(final Yggdrasil plugin, OfflinePlayer player, final PlayerData data) {
         return getSkinFile(plugin, player, Colors.from(data.getLives()));
     }
 
-    public static File getSkinFile(final Yggdrasil plugin, Player player, final Colors colors) {
+    public static File getSkinFile(final Yggdrasil plugin, OfflinePlayer player, final Colors colors) {
         final UUID uuid = player.getUniqueId();
         final File dataFolder = plugin.getDataFolder();
         final File userFolder = new File(dataFolder, uuid.toString());

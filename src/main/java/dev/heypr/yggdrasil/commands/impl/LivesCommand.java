@@ -1,6 +1,7 @@
 package dev.heypr.yggdrasil.commands.impl;
 
 import dev.heypr.yggdrasil.Yggdrasil;
+import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.misc.ColorManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -26,16 +27,17 @@ public class LivesCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.GREEN + "You have " + color + lives + ChatColor.GREEN + String.format(" %s.", lives == 1 ? "life" : "lives"));
         }
         else if (args.length == 1) {
-            Player target = sender.getServer().getPlayer(args[0]);
-            if (target == null) {
+            PlayerData targetData = PlayerData.fromUsernameOrDisguiseName(args[0]);
+
+            if (targetData == null || !targetData.isOnline()) {
                 sender.sendMessage(ChatColor.RED + "Player not found.");
                 return true;
             }
 
-            final int lives = plugin.getPlayerData().get(target.getUniqueId()).getDisplayLives();
+            final int lives = targetData.getDisplayLives();
             final ChatColor color = ColorManager.getColor(lives);
 
-            sender.sendMessage(ChatColor.GREEN + target.getName() + " has " + color + lives + ChatColor.GREEN + String.format(" %s.", lives == 1 ? "life" : "lives"));
+            sender.sendMessage(ChatColor.GREEN + targetData.getUsernameOrNick() + " has " + color + lives + ChatColor.GREEN + String.format(" %s.", lives == 1 ? "life" : "lives"));
             return true;
         }
         else {
