@@ -238,6 +238,8 @@ public final class SkinManager {
 
                     final SkinData data = new SkinData(skin.getString("value"), skin.getString("signature"), null);
 
+                    this.saveSkinData(value, data);
+
                     callback.accept(data, null);
                 } catch (final Exception exception) {
                     callback.accept(null, exception);
@@ -256,7 +258,7 @@ public final class SkinManager {
      * @param callback
      */
     public void getSkinData(final File file, final BiConsumer<SkinData, Exception> callback) {
-        if (!file.exists()) {
+        if (file == null || !file.exists()) {
             callback.accept(null, null);
             return;
         }

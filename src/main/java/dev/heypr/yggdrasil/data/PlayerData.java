@@ -217,9 +217,6 @@ public class PlayerData {
         final PlayerData disguisedAsData = this.getDisguiseData();
         final File skinFile = ColorManager.getSkinFile(Yggdrasil.plugin, disguisedAs == null ? player : disguisedAs, this);
 
-        if (skinFile == null)
-            return;
-
         Yggdrasil.plugin.skinManager.skin(player, skinFile, disguisedAsData == null ? null : disguisedAsData.getUsername(), success -> Yggdrasil.plugin.getSchedulerWrapper().runTaskLater(Yggdrasil.plugin, () -> this.fixPlayerData(player), 20L, true));
     }
 
