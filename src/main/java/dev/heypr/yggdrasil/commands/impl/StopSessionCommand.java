@@ -40,6 +40,8 @@ public class StopSessionCommand implements CommandExecutor {
             playerData.setRevealedData(false);
         });
 
+        plugin.getDisguiseMap().clear();
+
         Yggdrasil.plugin.cancelTasks(Yggdrasil.plugin.getCancelOnSessionStop());
 
         plugin.isSessionRunning = false;
