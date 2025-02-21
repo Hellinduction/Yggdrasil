@@ -41,10 +41,13 @@ public class PlayerJoinListener implements Listener {
     @SuppressWarnings("all")
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        this.removeFormerlyKnownAs(event);
-
         Player player = event.getPlayer();
         String originalUsername = player.getName();
+
+        plugin.getOriginalUsernameMap().put(player.getUniqueId(), originalUsername);
+        plugin.skinManager.saveSkinData(player);
+
+        this.removeFormerlyKnownAs(event);
 
         if (ToggleScoreboardCommand.isEnabled()) {
             if (plugin.getScoreboard() == null)
@@ -96,7 +99,7 @@ public class PlayerJoinListener implements Listener {
                 event.setJoinMessage(event.getJoinMessage().replace(originalUsername, username));
         }
 
-        playerData.update(-1);
+        playerData.update(PlayerData.UpdateFrom.JOIN, -1);
         plugin.getSchedulerWrapper().runTaskLater(plugin, () -> playerData.checkLives(), 10L, true);
 
         ColorManager.setTabListName(player, plugin.getPlayerData().get(player.getUniqueId()));

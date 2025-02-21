@@ -3,6 +3,7 @@ package dev.heypr.yggdrasil.misc;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import dev.heypr.yggdrasil.Yggdrasil;
+import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.misc.object.SkinData;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
@@ -37,6 +38,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * In order for this not to break chat messages, please set the value `enforce-secure-profile` to `false` in the server.properties
@@ -201,16 +203,36 @@ public final class SkinManager {
         return data;
     }
 
+    public void saveSkinData(final Player player) {
+        try {
+            final String value = Base64.getEncoder().encodeToString(player.getUniqueId().toString().getBytes());
+            final GameProfile profile = this.getProfile(player);
+            final List<Property> applicableProperties = profile.getProperties().get("textures").stream()
+                    .limit(1)
+                    .collect(Collectors.toList());
+
+            if (applicableProperties.isEmpty())
+                return;
+
+            final Property property = applicableProperties.get(0);
+            final SkinData skinData = new SkinData(property.value(), property.signature(), null);
+
+            this.saveSkinData(value, skinData);
+        } catch (final Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
     /**
      * Get skin data from players username
-     * @param username
+     * @param uuid
      * @param callback
      */
-    public void getSkinData(final String username, final BiConsumer<SkinData, Exception> callback) {
+    public void getSkinData(final UUID uuid, final BiConsumer<SkinData, Exception> callback) {
         Exception ex = null;
 
         try {
-            final String value = Base64.getEncoder().encodeToString(username.getBytes());
+            final String value = Base64.getEncoder().encodeToString(uuid.toString().getBytes());
             final SkinData saved = this.getSavedSkinData(value);
 
             if (saved != null) {
@@ -221,7 +243,7 @@ public final class SkinManager {
 
             new Thread(() -> {
                 try {
-                    final URL url = new URL(String.format("https://api.ashcon.app/mojang/v2/user/%s", username));
+                    final URL url = new URL(String.format("https://api.ashcon.app/mojang/v2/user/%s", uuid));
                     final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
                     conn.setRequestMethod("GET");
@@ -316,14 +338,20 @@ public final class SkinManager {
         }
     }
 
-    private void refreshPlayer(final Player p) {
+    public void hidePlayer(final Player player) {
         Bukkit.getOnlinePlayers().stream()
-                .filter(ps -> ps.getUniqueId() != p.getUniqueId())
-                .forEach(ps -> {
-                    ps.hidePlayer(p);
+                .filter(ps -> ps.getUniqueId() != player.getUniqueId())
+                .forEach(ps -> ps.hidePlayer(player));
+    }
 
-                    if (!p.getMetadata("vanished").stream().anyMatch(v -> true)) // Vanish check
-                        plugin.getScheduler().runTaskLater(plugin, () -> ps.showPlayer(p), 2L);
+    public void refreshPlayer(final Player player) {
+        Bukkit.getOnlinePlayers().stream()
+                .filter(ps -> ps.getUniqueId() != player.getUniqueId())
+                .forEach(ps -> {
+                    ps.hidePlayer(player);
+
+                    if (!player.getMetadata("vanished").stream().anyMatch(v -> true)) // Vanish check
+                        plugin.getScheduler().runTaskLater(plugin, () -> ps.showPlayer(player), 2L);
                 });
     }
 
@@ -339,11 +367,6 @@ public final class SkinManager {
     }
 
     private GameProfile updateNick(final GameProfile profile, final String name) throws ReflectiveOperationException {
-        final UUID uuid = profile.getId();
-
-        if (!Yggdrasil.plugin.getOriginalUsernameMap().containsKey(uuid))
-            Yggdrasil.plugin.getOriginalUsernameMap().put(uuid, profile.getName());
-
         final Field nameField = profile.getClass().getDeclaredField("name");
         nameField.setAccessible(true);
         nameField.set(profile, name);
@@ -357,8 +380,8 @@ public final class SkinManager {
         } catch (final Exception ignored) {}
     }
 
-    public void resetSkin(final Player player, final String realName) {
-        this.getSkinData(realName, (data, ignored) -> {
+    public void resetSkin(final Player player) {
+        this.getSkinData(player.getUniqueId(), (data, ignored) -> {
             if (data != null)
                 this.skinInternal(player, data, ignored2 -> {});
         });
@@ -407,15 +430,15 @@ public final class SkinManager {
             throw ex;
     }
 
-    private void skinInternal(final Player player, final SkinData skinData, final String name, final Consumer<Exception> exceptionConsumer) {
+    private void skinInternal(final Player player, final SkinData skinData, final PlayerData disguisedAs, final Consumer<Exception> exceptionConsumer) {
         plugin.getScheduler().runTask(plugin, () -> {
             try {
                 this.refreshPlayer(player);
 
                 final GameProfile profile = this.updateSkin(player, skinData);
 
-                if (name != null)
-                    this.updateNick(profile, name);
+                if (disguisedAs != null)
+                    this.updateNick(profile, disguisedAs.getUsername());
 
                 this.updateSkinViaPackets(player);
 
@@ -436,11 +459,11 @@ public final class SkinManager {
         this.skin(player, file, null, callback);
     }
 
-    public void skin(final Player player, final File file, final String name, final Consumer<Boolean> callback) {
-        this.skin(player, file, name, callback, null);
+    public void skin(final Player player, final File file, final PlayerData disguisedAs, final Consumer<Boolean> callback) {
+        this.skin(player, file, disguisedAs, callback, null);
     }
 
-    public void skin(final Player player, final File file, final String name, final Consumer<Boolean> callback, final Consumer<Exception> exceptionConsumer) {
+    public void skin(final Player player, final File file, final PlayerData disguiseAs, final Consumer<Boolean> callback, final Consumer<Exception> exceptionConsumer) {
         final Consumer<Exception> failure = ex -> Yggdrasil.plugin.getScheduler().runTask(Yggdrasil.plugin, () -> {
             exceptionConsumer.accept(ex);
 
@@ -449,7 +472,7 @@ public final class SkinManager {
         });
 
         this.getSkinData(file, (data, exception) -> {
-            final Consumer<SkinData> success = d -> this.skinInternal(player, d, name, exception2 -> {
+            final Consumer<SkinData> success = d -> this.skinInternal(player, d, disguiseAs, exception2 -> {
                 if (exceptionConsumer != null) {
                     if (exception != null)
                         exceptionConsumer.accept(exception);
@@ -468,8 +491,8 @@ public final class SkinManager {
                 return;
             }
 
-            if (data == null && name != null) {
-                this.getSkinData(name, (d, ex) -> {
+            if (data == null && disguiseAs != null) {
+                this.getSkinData(disguiseAs.getUuid(), (d, ex) -> {
                     if (ex != null && d == null && exceptionConsumer != null) {
                         failure.accept(ex);
                         return;

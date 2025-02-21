@@ -22,12 +22,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.util.UUID;
 import java.util.function.Predicate;
 
 public class PlayerData {
+    public enum UpdateFrom {
+        UNKNOWN,
+        JOIN,
+        SHUFFLE_NAMES
+    }
+
     private UUID uuid;
     private String username;
     private boolean revealedData = false;
@@ -208,7 +215,7 @@ public class PlayerData {
         return uuid == null ? null : Yggdrasil.plugin.getPlayerData().get(uuid);
     }
 
-    private void updateSkin() {
+    private void updateSkin(final UpdateFrom from) {
         final Player player = this.getPlayer();
 
         if (player == null || !player.isOnline())
@@ -223,7 +230,15 @@ public class PlayerData {
         if (resetSkin)
             this.resetNameAndSkin();
 
-        manager.skin(player, skinFile, disguisedAsData == null ? null : disguisedAsData.getUsername(), success -> Yggdrasil.plugin.getSchedulerWrapper().runTaskLater(Yggdrasil.plugin, () -> this.fixPlayerData(player), 20L, true));
+        if (from == UpdateFrom.JOIN)
+            manager.hidePlayer(player);
+
+        manager.skin(player, skinFile, disguisedAsData, success -> {
+            if (from == UpdateFrom.JOIN && !success)
+                manager.refreshPlayer(player);
+
+            Yggdrasil.plugin.getSchedulerWrapper().runTaskLater(Yggdrasil.plugin, () -> this.fixPlayerData(player), 20L, true);
+        });
     }
 
     public void resetNameAndSkin() {
@@ -235,7 +250,7 @@ public class PlayerData {
         final SkinManager manager = Yggdrasil.plugin.skinManager;
 
         manager.updateNick(player, this.username);
-        manager.resetSkin(player, this.username);
+        manager.resetSkin(player);
     }
 
     private void removeOtherColorRoles(final Guild guild, final Member member, final ColorManager.Colors exclude) {
@@ -306,17 +321,21 @@ public class PlayerData {
         Yggdrasil.plugin.saveConfig();
     }
 
+    private void update(final int previousLives) {
+        this.update(UpdateFrom.UNKNOWN, previousLives);
+    }
+
     /**
      * Updates some stuff based on the PlayerData state
      */
-    public void update(final int previousLives) {
+    public void update(final UpdateFrom from, final int previousLives) {
         if (previousLives == this.lives)
             return;
 
         this.saveLives();
 
         if (previousLives != Integer.MIN_VALUE)
-            this.updateSkin();
+            this.updateSkin(from);
 
         if (this.lives > 0 && this.lastChance)
             this.lastChance = false;
@@ -378,7 +397,7 @@ public class PlayerData {
 
         player.sendTitle(ChatColor.GRAY + "You will have...", "", 10, 20, 10);
 
-        new BukkitRunnable() {
+        final BukkitTask task = new BukkitRunnable() {
             int e = randomizer ? 15 : 0;
 
             @Override
@@ -399,7 +418,7 @@ public class PlayerData {
                             10, 20, 10);
 
                     updateColor();
-                    updateSkin();
+                    updateSkin(UpdateFrom.UNKNOWN);
                     cancel();
 
                     if (addPlayer)
@@ -407,6 +426,9 @@ public class PlayerData {
                 }
             }
         }.runTaskTimer(plugin, 40L, 5L);
+
+        Yggdrasil.plugin.getCancelOnShutdown().add(task);
+        Yggdrasil.plugin.getCancelOnSessionStop().add(task);
     }
 
     /**

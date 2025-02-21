@@ -57,10 +57,10 @@ public final class CommandWrapper implements CommandExecutor {
         } catch (final NullPointerException exception) {
             final String message = exception.getMessage();
 
-            if (message.contains(PlayerData.class.getName()) && message.contains("java.util.Map.get(Object)"))
+            if (message != null && message.contains(PlayerData.class.getName()) && message.contains("java.util.Map.get(Object)"))
                 sender.sendMessage(ChatColor.RED + (args.length == 0 ? "Your player data could not be found." : "The player data for that player could not be found."));
             else
-                exception.printStackTrace();
+                throw exception;
         }
 
         return false;
