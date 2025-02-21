@@ -2,6 +2,7 @@ package dev.heypr.yggdrasil.data;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import dev.heypr.yggdrasil.misc.ColorManager;
+import dev.heypr.yggdrasil.misc.SkinManager;
 import dev.heypr.yggdrasil.misc.discord.Bot;
 import dev.heypr.yggdrasil.misc.discord.BotUtils;
 import dev.heypr.yggdrasil.misc.discord.command.CommandManager;
@@ -35,9 +36,9 @@ public class PlayerData {
     private boolean lastChance;
     private int kills;
 
-    public PlayerData(UUID uuid, String username, int lives) {
-        this.uuid = uuid;
-        this.username = username;
+    public PlayerData(final OfflinePlayer player, int lives) {
+        this.uuid = player.getUniqueId();
+        this.username = Yggdrasil.plugin.getOriginalUsernameMap().containsKey(this.uuid) ? Yggdrasil.plugin.getOriginalUsernameMap().get(this.uuid) : player.getName();
         this.lives = lives;
         this.isBoogeyman = false;
         this.lastChance = false;
@@ -216,27 +217,25 @@ public class PlayerData {
         final OfflinePlayer disguisedAs = this.getDisguisePlayer();
         final PlayerData disguisedAsData = this.getDisguiseData();
         final File skinFile = ColorManager.getSkinFile(Yggdrasil.plugin, disguisedAs == null ? player : disguisedAs, this);
+        final SkinManager manager = Yggdrasil.plugin.skinManager;
+        final boolean resetSkin = disguisedAsData == null && !player.getName().equals(this.username);
 
-        Yggdrasil.plugin.skinManager.skin(player, skinFile, disguisedAsData == null ? null : disguisedAsData.getUsername(), success -> Yggdrasil.plugin.getSchedulerWrapper().runTaskLater(Yggdrasil.plugin, () -> this.fixPlayerData(player), 20L, true));
+        if (resetSkin)
+            this.resetNameAndSkin();
+
+        manager.skin(player, skinFile, disguisedAsData == null ? null : disguisedAsData.getUsername(), success -> Yggdrasil.plugin.getSchedulerWrapper().runTaskLater(Yggdrasil.plugin, () -> this.fixPlayerData(player), 20L, true));
     }
 
-    public String updateNick() {
+    public void resetNameAndSkin() {
         final Player player = this.getPlayer();
 
         if (player == null || !player.isOnline())
-            return null;
+            return;
 
-        final PlayerData disguisedAs = this.getDisguiseData();
+        final SkinManager manager = Yggdrasil.plugin.skinManager;
 
-        if (disguisedAs == null)
-            return null;
-
-        Yggdrasil.plugin.skinManager.nick(player, disguisedAs.getUsername(), exception -> {
-            if (exception != null)
-                exception.printStackTrace();
-        });
-
-        return disguisedAs.getUsername();
+        manager.updateNick(player, this.username);
+        manager.resetSkin(player, this.username);
     }
 
     private void removeOtherColorRoles(final Guild guild, final Member member, final ColorManager.Colors exclude) {

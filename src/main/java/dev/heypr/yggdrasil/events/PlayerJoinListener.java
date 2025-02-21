@@ -89,7 +89,8 @@ public class PlayerJoinListener implements Listener {
         final PlayerData playerData = plugin.getPlayerData().get(player.getUniqueId());
 
         if (ShuffleNamesCommand.isEnabled()) {
-            final String username = playerData.updateNick();
+            final PlayerData disguisedAs = playerData.getDisguiseData();
+            final String username = disguisedAs == null ? null : disguisedAs.getUsername();
 
             if (username != null)
                 event.setJoinMessage(event.getJoinMessage().replace(originalUsername, username));

@@ -54,7 +54,7 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
 
         for (final Player boogeyman : boogeyMen) {
             final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(boogeyman.getUniqueId(), plugin.randomLives());
-            final PlayerData data = new PlayerData(boogeyman.getUniqueId(), boogeyman.getName(), pair.getKey());
+            final PlayerData data = new PlayerData(boogeyman, pair.getKey());
 
             playerData.put(boogeyman.getUniqueId(), data);
             playerData.get(boogeyman.getUniqueId()).setBoogeyman(true);
@@ -90,7 +90,7 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
 
         playerPool.forEach(player -> {
             final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(player.getUniqueId(), plugin.randomLives());
-            final PlayerData data = new PlayerData(player.getUniqueId(), player.getName(), pair.getKey());
+            final PlayerData data = new PlayerData(player, pair.getKey());
 
             playerData.putIfAbsent(player.getUniqueId(), data);
             player.setGameMode(GameMode.SURVIVAL);

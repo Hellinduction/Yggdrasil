@@ -34,10 +34,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.EnumSet;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -306,7 +303,8 @@ public final class SkinManager {
             ex = exception;
         }
 
-        callback.accept(null, ex);
+        if (ex != null)
+            callback.accept(null, ex);
     }
 
     private String encodeSkinToBase64(final File skinFile) throws IOException {
@@ -341,6 +339,11 @@ public final class SkinManager {
     }
 
     private GameProfile updateNick(final GameProfile profile, final String name) throws ReflectiveOperationException {
+        final UUID uuid = profile.getId();
+
+        if (!Yggdrasil.plugin.getOriginalUsernameMap().containsKey(uuid))
+            Yggdrasil.plugin.getOriginalUsernameMap().put(uuid, profile.getName());
+
         final Field nameField = profile.getClass().getDeclaredField("name");
         nameField.setAccessible(true);
         nameField.set(profile, name);
@@ -348,9 +351,17 @@ public final class SkinManager {
         return profile;
     }
 
-    private GameProfile updateNick(final Player player, final String name) throws Exception {
-        final GameProfile profile = this.getProfile(player);
-        return this.updateNick(profile, name);
+    public void updateNick(final Player player, final String realName) {
+        try {
+            this.updateNick(this.getProfile(player), realName);
+        } catch (final Exception ignored) {}
+    }
+
+    public void resetSkin(final Player player, final String realName) {
+        this.getSkinData(realName, (data, ignored) -> {
+            if (data != null)
+                this.skinInternal(player, data, ignored2 -> {});
+        });
     }
 
     private void updateSkinViaPackets(final Player player) throws Exception {
@@ -417,18 +428,6 @@ public final class SkinManager {
         });
     }
 
-    private void nickInternal(final Player player, final String name, final Consumer<Exception> exceptionConsumer) {
-        try {
-            this.refreshPlayer(player);
-            this.updateNick(player, name);
-            this.refreshPlayer(player);
-
-            exceptionConsumer.accept(null);
-        } catch (final Exception exception) {
-            exceptionConsumer.accept(exception);
-        }
-    }
-
     private void skinInternal(final Player player, final SkinData skinData, final Consumer<Exception> exceptionConsumer) {
         this.skinInternal(player, skinData, null, exceptionConsumer);
     }
@@ -479,19 +478,9 @@ public final class SkinManager {
                     if (d != null)
                         success.accept(d);
                 });
-            }
-
-            if (data != null)
+            } else if (data != null) {
                 success.accept(data);
+            }
         });
-    }
-
-    /**
-     * Used for only nicking the player
-     * @param player
-     * @param name
-     */
-    public void nick(final Player player, final String name, final Consumer<Exception> exceptionConsumer) {
-        this.nickInternal(player, name, exceptionConsumer);
     }
 }

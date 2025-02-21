@@ -45,6 +45,7 @@ public final class Yggdrasil extends JavaPlugin {
     List<BukkitTask> cancelOnShutdown = new ArrayList<>();
     List<BukkitTask> cancelOnSessionStop = new ArrayList<>();
     Map<UUID, UUID> disguiseMap = new HashMap<>();
+    Map<UUID, String> originalUsernameMap = new HashMap<>();
 
     public BukkitScheduler schedulerWrapper;
     public boolean isSessionRunning = false;
@@ -223,6 +224,10 @@ public final class Yggdrasil extends JavaPlugin {
 
     public Map<UUID, UUID> getDisguiseMap() {
         return disguiseMap;
+    }
+
+    public Map<UUID, String> getOriginalUsernameMap() {
+        return originalUsernameMap;
     }
 
     public List<Player> getDeadPlayers() {

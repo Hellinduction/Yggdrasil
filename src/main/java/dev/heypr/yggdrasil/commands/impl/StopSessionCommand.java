@@ -38,6 +38,7 @@ public class StopSessionCommand implements CommandExecutor {
             }
 
             playerData.setRevealedData(false);
+            playerData.resetNameAndSkin();
         });
 
         plugin.getDisguiseMap().clear();
