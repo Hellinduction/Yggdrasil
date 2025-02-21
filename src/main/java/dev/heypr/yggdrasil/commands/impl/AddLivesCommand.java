@@ -7,7 +7,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -28,65 +27,57 @@ public class AddLivesCommand implements CommandExecutor {
             return true;
         }
 
-        Player target = sender.getServer().getPlayer(args[0]);
-        boolean isSet = label.toLowerCase().endsWith("setlives");
+        PlayerData.useFromRealName(sender, args[0], (target, targetData) -> {
+            boolean isSet = label.toLowerCase().endsWith("setlives");
 
-        if (target == null) {
-            sender.sendMessage(ChatColor.RED + "Player not found.");
-            return true;
-        }
+            if (args.length == 2) {
+                int amount = Integer.parseInt(args[1]);
+                boolean tooLow = isSet ? amount < 0 : amount < 1;
 
-        if (args.length == 2) {
-            int amount = Integer.parseInt(args[1]);
-            boolean tooLow = isSet ? amount < 0 : amount < 1;
+                if (tooLow) {
+                    sender.sendMessage(ChatColor.RED + "Invalid amount.");
+                    return;
+                }
 
-            if (tooLow) {
-                sender.sendMessage(ChatColor.RED + "Invalid amount.");
-                return true;
-            }
+                int targetLives = plugin.getPlayerData().get(target.getUniqueId()).getLives();
+                boolean aboveMax = isSet ? amount > Yggdrasil.MAX_LIVES : targetLives + amount > Yggdrasil.MAX_LIVES;
 
-            int targetLives = plugin.getPlayerData().get(target.getUniqueId()).getLives();
-            boolean aboveMax = isSet ? amount > Yggdrasil.MAX_LIVES : targetLives + amount > Yggdrasil.MAX_LIVES;
+                if (aboveMax) {
+                    sender.sendMessage(ChatColor.RED + String.format("Player cannot have more than %s lives.", Yggdrasil.MAX_LIVES));
+                    return;
+                }
 
-            if (aboveMax) {
-                sender.sendMessage(ChatColor.RED + String.format("Player cannot have more than %s lives.", Yggdrasil.MAX_LIVES));
-                return true;
-            }
+                if (targetLives < 0 && !isSet)
+                    amount = 2;
 
-            if (targetLives < 0 && !isSet)
-                amount = 2;
+                boolean currentlyDead = targetLives <= 0;
+                boolean revival = isSet ? currentlyDead && amount > 0 : currentlyDead;
 
-            boolean currentlyDead = targetLives <= 0;
-            boolean revival = isSet ? currentlyDead && amount > 0 : currentlyDead;
-            PlayerData targetData = plugin.getPlayerData().get(target.getUniqueId());
+                if (revival)
+                    targetData.revive();
 
-            if (revival)
-                targetData.revive();
+                if (isSet) {
+                    targetData.setLives(amount);
+                    targetData.checkLives();
+                }
+                else {
+                    targetData.addLives(amount);
+                    targetData.checkLives();
+                }
 
-            if (isSet) {
-                targetData.setLives(amount);
-                targetData.checkLives();
-            }
-            else {
-                targetData.addLives(amount);
-                targetData.checkLives();
-            }
+                final ChatColor color = ColorManager.getColor(amount);
 
-            final ChatColor color = ColorManager.getColor(amount);
-
-            if (!isSet) {
-                sender.sendMessage(ChatColor.GREEN + "You have given " + color + amount + ChatColor.GREEN + " lives to " + targetData.getDisplayName() + ".");
-                target.sendMessage(ChatColor.GREEN + "You have been given " + color + amount + ChatColor.GREEN + " lives.");
+                if (!isSet) {
+                    sender.sendMessage(ChatColor.GREEN + "You have given " + color + amount + ChatColor.GREEN + " lives to " + targetData.getDisplayName() + ".");
+                    target.sendMessage(ChatColor.GREEN + "You have been given " + color + amount + ChatColor.GREEN + " lives.");
+                } else {
+                    sender.sendMessage(ChatColor.GREEN + "You have set the lives of " + targetData.getDisplayName() + " to " + color + amount + ChatColor.GREEN + ".");
+                    target.sendMessage(ChatColor.GREEN + "Your lives have been set to " + color + amount + ChatColor.GREEN + ".");
+                }
             } else {
-                sender.sendMessage(ChatColor.GREEN + "You have set the lives of " + targetData.getDisplayName() + " to " + color + amount + ChatColor.GREEN + ".");
-                target.sendMessage(ChatColor.GREEN + "Your lives have been set to " + color + amount + ChatColor.GREEN + ".");
+                sender.sendMessage(ChatColor.RED + "Invalid amount.");
             }
-            return true;
-        }
-
-        else {
-            sender.sendMessage(ChatColor.RED + "Invalid amount.");
-        }
+        });
 
         return true;
     }

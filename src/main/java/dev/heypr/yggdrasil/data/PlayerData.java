@@ -17,6 +17,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -26,6 +27,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 public class PlayerData {
@@ -510,5 +512,23 @@ public class PlayerData {
     public static PlayerData fromUsernameOrDisguiseName(final String name) {
         final PlayerData disguiseData = fromDisguiseName(name);
         return disguiseData == null ? fromUsername(name) : disguiseData;
+    }
+
+    /**
+     * This should be used on commands that require a player after the session has started, and is not related to adding the player to the game
+     * @param sender
+     * @param name
+     * @param callback
+     */
+    public static void useFromRealName(final CommandSender sender, final String name, final BiConsumer<Player, PlayerData> callback) {
+        final PlayerData data = fromUsername(name);
+        final Player player = data != null && data.isOnline() ? data.getPlayer() : null;
+
+        if (player == null || data == null) {
+            sender.sendMessage(ChatColor.RED + "Player not found.");
+            return;
+        }
+
+        callback.accept(player, data);
     }
 }

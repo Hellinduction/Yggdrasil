@@ -6,7 +6,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class SetBoogeymanCommand implements CommandExecutor {
@@ -25,24 +24,15 @@ public class SetBoogeymanCommand implements CommandExecutor {
         }
 
         if (args.length == 1) {
+            PlayerData.useFromRealName(sender, args[0], (target, targetData) -> {
+                if (targetData.isBoogeyman()) {
+                    sender.sendMessage(ChatColor.RED + targetData.getDisplayName() + " is already a Boogeyman.");
+                    return;
+                }
 
-            Player target = sender.getServer().getPlayer(args[0]);
-
-            if (target == null) {
-                sender.sendMessage(ChatColor.RED + "Player not found.");
-                return true;
-            }
-
-            final PlayerData targetData = plugin.getPlayerData().get(target.getUniqueId());
-
-            if (targetData.isBoogeyman()) {
-                sender.sendMessage(ChatColor.RED + targetData.getDisplayName() + " is already a Boogeyman.");
-                return true;
-            }
-
-            targetData.setBoogeyman(true);
-            sender.sendMessage(ChatColor.GREEN + targetData.getDisplayName() + " is now a Boogeyman.");
-            return true;
+                targetData.setBoogeyman(true);
+                sender.sendMessage(ChatColor.GREEN + targetData.getDisplayName() + " is now a Boogeyman.");
+            });
         }
         else {
             sender.sendMessage(ChatColor.RED + "Usage: /setboogeyman <player>");
