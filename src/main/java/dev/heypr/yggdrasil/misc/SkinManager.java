@@ -17,6 +17,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -36,6 +37,8 @@ import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -44,9 +47,11 @@ import java.util.stream.Collectors;
  * In order for this not to break chat messages, please set the value `enforce-secure-profile` to `false` in the server.properties
  */
 public final class SkinManager {
+    private static final ExecutorService SERVICE = Executors.newCachedThreadPool();
     private static final String MINESKIN_DOMAIN = "api.mineskin.org";
 
     private final Yggdrasil plugin;
+    private final CloseableHttpClient httpClient;
 
     private GameProfile getProfile(final Player player) throws Exception {
         final CraftPlayer craftPlayer = (CraftPlayer) player;
@@ -57,6 +62,15 @@ public final class SkinManager {
 
     public SkinManager(final Yggdrasil plugin) {
         this.plugin = plugin;
+
+        final PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+
+        connectionManager.setMaxTotal(10);
+        connectionManager.setDefaultMaxPerRoute(5);
+
+        this.httpClient = HttpClients.custom()
+                .setConnectionManager(connectionManager)
+                .build();
     }
 
     private JSONObject extractData(final JSONObject obj) {
@@ -72,6 +86,9 @@ public final class SkinManager {
      * @return
      */
     private boolean skinFound(final JSONObject obj) {
+        if (!obj.has("messages"))
+            return false;
+
         final JSONArray messages = obj.getJSONArray("messages");
 
         if (messages.isEmpty())
@@ -109,29 +126,28 @@ public final class SkinManager {
     private String uploadSkin(final File file) throws IOException {
         final String url = String.format("https://%s/v2/queue", MINESKIN_DOMAIN);
 
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpPost post = new HttpPost(url);
+        HttpPost post = new HttpPost(url);
 
-            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-            builder.addPart("file", new FileBody(file));
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        builder.addPart("file", new FileBody(file));
 
-            HttpEntity entity = builder.build();
-            post.setEntity(entity);
+        HttpEntity entity = builder.build();
+        post.setEntity(entity);
 
-            try (CloseableHttpResponse response = client.execute(post)) {
-                final InputStream inputStream = response.getEntity().getContent();
-                final JSONObject obj = new JSONObject(new JSONTokener(inputStream));
+        try (CloseableHttpResponse response = this.httpClient.execute(post)) {
+            final InputStream inputStream = response.getEntity().getContent();
+            final JSONObject obj = new JSONObject(new JSONTokener(inputStream));
 
-                if (this.skinFound(obj))
-                    return extractData(obj).toString(4);
+            if (this.skinFound(obj))
+                return extractData(obj).toString(4);
 
-                final JSONObject links = obj.getJSONObject("links");
-                final String endpoint = links.getString("job");
+            if (obj.has("rateLimit"))
+                return null;
 
-                return String.format("https://%s%s", MINESKIN_DOMAIN, endpoint);
-            } catch (final Exception exception) {
-                throw exception;
-            }
+            final JSONObject links = obj.getJSONObject("links");
+            final String endpoint = links.getString("job");
+
+            return String.format("https://%s%s", MINESKIN_DOMAIN, endpoint);
         } catch (final Exception exception) {
             throw exception;
         }
@@ -145,27 +161,25 @@ public final class SkinManager {
 
             @Override
             public void run() {
-                try (CloseableHttpClient client = HttpClients.createDefault()) {
-                    HttpGet get = new HttpGet(jobUrl);
+                HttpGet get = new HttpGet(jobUrl);
 
-                    try (CloseableHttpResponse response = client.execute(get)) {
-                        final InputStream inputStream = response.getEntity().getContent();
-                        final JSONObject obj = new JSONObject(new JSONTokener(inputStream));
+                try (CloseableHttpResponse response = httpClient.execute(get)) {
+                    final InputStream inputStream = response.getEntity().getContent();
+                    final JSONObject obj = new JSONObject(new JSONTokener(inputStream));
 
-                        if (isJobPending(obj)) {
-                            if (++failCounter > MAX_FAILS) {
-                                super.cancel();
-                                callback.accept(null, new Exception(String.format("Max attempts of %s exceeded", MAX_FAILS)));
-                            }
-
-                            return; // Not done yet
+                    if (isJobPending(obj)) {
+                        if (++failCounter > MAX_FAILS) {
+                            super.cancel();
+                            callback.accept(null, new Exception(String.format("Max attempts of %s exceeded", MAX_FAILS)));
                         }
 
-                        final JSONObject data = extractData(obj);
-
-                        callback.accept(data, null);
-                        super.cancel();
+                        return; // Not done yet
                     }
+
+                    final JSONObject data = extractData(obj);
+
+                    callback.accept(data, null);
+                    super.cancel();
                 } catch (final Exception exception) {
                     super.cancel();
                     callback.accept(null, exception);
@@ -224,7 +238,7 @@ public final class SkinManager {
     }
 
     /**
-     * Get skin data from players username
+     * Get skin data from players UUID
      * @param uuid
      * @param callback
      */
@@ -241,12 +255,14 @@ public final class SkinManager {
                 return;
             }
 
-            new Thread(() -> {
+            SERVICE.execute(() -> {
                 try {
                     final URL url = new URL(String.format("https://api.ashcon.app/mojang/v2/user/%s", uuid));
                     final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
                     conn.setRequestMethod("GET");
+                    conn.setRequestProperty("Connection", "Keep-Alive");
+                    conn.setRequestProperty("Keep-Alive", "timeout=30, max=5");
 
                     final InputStream in = conn.getInputStream();
                     final String json = new String(IOUtils.toString(in));
@@ -263,7 +279,7 @@ public final class SkinManager {
                 } catch (final Exception exception) {
                     callback.accept(null, exception);
                 }
-            }).start();
+            });
         } catch (final Exception exception) {
             ex = exception;
         }
@@ -296,7 +312,7 @@ public final class SkinManager {
                 return;
             }
 
-            new Thread(() -> {
+            SERVICE.execute(() -> {
                 try {
                     final BiConsumer<JSONObject, Exception> apply = (dataObj, exception) -> {
                         if (dataObj == null) {
@@ -305,11 +321,15 @@ public final class SkinManager {
                         }
 
                         final SkinData data = this.saveSkinData(value, dataObj, fileHash);
-
                         callback.accept(data, exception);
                     };
 
                     final String jobUrl = this.uploadSkin(file);
+
+                    if (jobUrl == null) {
+                        callback.accept(null, new Exception("Rate limited"));
+                        return;
+                    }
 
                     try {
                         final JSONObject response = new JSONObject(jobUrl);
@@ -320,7 +340,7 @@ public final class SkinManager {
                 } catch (final Exception exception) {
                     callback.accept(null, exception);
                 }
-            }).start();
+            });
         } catch (final Exception exception) {
             ex = exception;
         }
