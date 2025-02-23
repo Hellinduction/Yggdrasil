@@ -82,6 +82,8 @@ public class PlayerDeathListener implements Listener {
                 event.setShouldDropExperience(true);
                 event.getDrops().addAll(originalDrops);
             }
+
+            data.resetNameAndSkin();
         }
 
         data.decreaseLives(1);

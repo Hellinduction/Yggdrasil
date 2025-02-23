@@ -28,7 +28,6 @@ public final class ShuffleNamesCommand implements CommandExecutor {
         }
 
         final List<Player> players = playerData.stream()
-                .filter(PlayerData::isOnline)
                 .filter(data -> data.getLives() > 0)
                 .map(data -> data.getPlayer())
                 .collect(Collectors.toUnmodifiableList());
@@ -46,8 +45,10 @@ public final class ShuffleNamesCommand implements CommandExecutor {
             disguiseMap.put(current.getUniqueId(), next.getUniqueId());
         }
 
-        for (final PlayerData data : playerData)
-            data.update(PlayerData.UpdateFrom.SHUFFLE_NAMES, -1);
+        for (final PlayerData data : playerData) {
+            if (data.isOnline())
+                data.update(PlayerData.UpdateFrom.SHUFFLE_NAMES, -1);
+        }
 
         sender.sendMessage(ChatColor.GREEN + "Attempted to shuffle names/skins.");
         return true;
