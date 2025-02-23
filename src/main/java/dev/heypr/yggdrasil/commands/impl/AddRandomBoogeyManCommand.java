@@ -30,45 +30,61 @@ public final class AddRandomBoogeyManCommand implements CommandExecutor {
             return true;
         }
 
-        final List<Player> boogeyMen = plugin.pickBoogeyMen(1);
+        int count = 1;
+
+        if (args.length > 0) {
+            try {
+                count = Integer.parseInt(args[0]);
+            } catch (final NumberFormatException ignored) {}
+        }
+
+        final List<Player> boogeyMen = plugin.pickBoogeyMen(count, player -> {
+            final PlayerData data = plugin.getPlayerData().get(player.getUniqueId());
+
+            if (data == null)
+                return false;
+
+            return !data.isBoogeyman();
+        });
 
         if (boogeyMen.isEmpty()) {
             sender.sendMessage(ChatColor.RED + "There was applicable boogeyman that could be added.");
             return true;
         }
 
-        final Player boogeyman = boogeyMen.get(0);
-        final int lives = PlayerData.retrieveLivesOrDefault(boogeyman.getUniqueId(), plugin.randomLives());
+        for (final Player boogeyman : boogeyMen) {
+            final int lives = PlayerData.retrieveLivesOrDefault(boogeyman.getUniqueId(), plugin.randomLives());
 
-        playerData.putIfAbsent(boogeyman.getUniqueId(), new PlayerData(boogeyman, lives));
+            playerData.putIfAbsent(boogeyman.getUniqueId(), new PlayerData(boogeyman, lives));
 
-        final PlayerData data = playerData.get(boogeyman.getUniqueId());
+            final PlayerData data = playerData.get(boogeyman.getUniqueId());
 
-        data.setRevealedData(false);
-        data.setBoogeyman(true);
+            data.setRevealedData(false);
+            data.setBoogeyman(true);
 
-        plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
-            boogeyman.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
             plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
-                boogeyman.sendTitle(ChatColor.YELLOW + "2", "", 10, 20, 10);
+                boogeyman.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
                 plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
-                    boogeyman.sendTitle(ChatColor.RED + "1", "", 10, 20, 10);
+                    boogeyman.sendTitle(ChatColor.YELLOW + "2", "", 10, 20, 10);
                     plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
-                        boogeyman.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
+                        boogeyman.sendTitle(ChatColor.RED + "1", "", 10, 20, 10);
                         plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
-                            boogeyman.sendTitle(ChatColor.RED + "THE BOOGEYMAN!", "", 10, 70, 20);
+                            boogeyman.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
+                            plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
+                                boogeyman.sendTitle(ChatColor.RED + "THE BOOGEYMAN!", "", 10, 70, 20);
 
-                            boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou are the &6&lBoogeyman&4&l!!!"));
-                            boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&lRemember, as the &6&lBoogeyman&7&l your goal is to kill 1 player during this session."));
+                                boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou are the &6&lBoogeyman&4&l!!!"));
+                                boogeyman.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7&lRemember, as the &6&lBoogeyman&7&l your goal is to kill 1 player during this session."));
 
-                            data.setRevealedData(true);
-                        }, 60L, true);
+                                data.setRevealedData(true);
+                            }, 60L, true);
+                        }, 20L, true);
                     }, 20L, true);
                 }, 20L, true);
-            }, 20L, true);
-        }, 40L, true);
+            }, 40L, true);
+        }
 
-        sender.sendMessage(ChatColor.GREEN + "Successfully added a random boogeyman.");
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&7Successfully added &a%s&7 random boogeyman.")));
         return true;
     }
 }

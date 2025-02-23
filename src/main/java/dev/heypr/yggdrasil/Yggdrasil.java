@@ -33,6 +33,7 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class Yggdrasil extends JavaPlugin {
@@ -283,18 +284,27 @@ public final class Yggdrasil extends JavaPlugin {
         return legacy.deserialize(legacy.serialize(mm.deserialize(text).asComponent()));
     }
 
+    private List<Player> getBoogeyManPool() {
+        return this.getBoogeyManPool(player -> true);
+    }
+
     /**
      * Returns all people that could be boogeyman
      * @return
      */
-    private List<Player> getBoogeyManPool() {
+    private List<Player> getBoogeyManPool(final Predicate<Player> predicate) {
         final List<Player> players = new ArrayList<>(plugin.getServer().getOnlinePlayers());
 
         final List<Player> potentialBoogyMen = players.stream()
                 .filter(player -> PlayerData.retrieveLives(player.getUniqueId()) > 1)
+                .filter(predicate)
                 .collect(Collectors.toList());
 
         return potentialBoogyMen;
+    }
+
+    public List<Player> pickBoogeyMen(int boogeyMen) {
+        return this.pickBoogeyMen(boogeyMen, player -> true);
     }
 
     /**
@@ -302,8 +312,8 @@ public final class Yggdrasil extends JavaPlugin {
      * @param boogeyMen Number of Boogeymen to select.
      * @return List of players who were selected as Boogeymen.
      */
-    public List<Player> pickBoogeyMen(int boogeyMen) {
-        final List<Player> boogeyManPool = this.getBoogeyManPool();
+    public List<Player> pickBoogeyMen(int boogeyMen, final Predicate<Player> predicate) {
+        final List<Player> boogeyManPool = this.getBoogeyManPool(predicate);
         final int boogeyManPoolCount = boogeyManPool.size();
 
         if (boogeyMen >= boogeyManPoolCount && boogeyManPoolCount != 1)

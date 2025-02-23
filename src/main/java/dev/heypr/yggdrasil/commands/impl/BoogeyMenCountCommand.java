@@ -20,7 +20,7 @@ public final class BoogeyMenCountCommand implements CommandExecutor {
                 .filter(PlayerData::isBoogeyman)
                 .count();
 
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&7Boogeymen count: %s", count)));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&7Boogeymen count: &a%s", count)));
         return true;
     }
 }
