@@ -386,6 +386,10 @@ public class PlayerData {
         return Bukkit.getPlayer(this.uuid);
     }
 
+    public OfflinePlayer getOfflinePlayer() {
+        return Bukkit.getOfflinePlayer(this.uuid);
+    }
+
     public void displayLives(final boolean randomizer) {
         this.displayLives(randomizer, false);
     }
