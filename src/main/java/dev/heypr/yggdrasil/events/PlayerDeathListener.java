@@ -84,6 +84,7 @@ public class PlayerDeathListener implements Listener {
             }
 
             data.resetNameAndSkin();
+            plugin.getDisguiseMap().remove(data.getUuid());
         }
 
         data.decreaseLives(1);
