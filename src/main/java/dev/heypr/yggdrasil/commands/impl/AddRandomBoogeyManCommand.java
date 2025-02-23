@@ -48,7 +48,7 @@ public final class AddRandomBoogeyManCommand implements CommandExecutor {
         });
 
         if (boogeyMen.isEmpty()) {
-            sender.sendMessage(ChatColor.RED + "There was applicable boogeyman that could be added.");
+            sender.sendMessage(ChatColor.RED + "There was not applicable boogeyman that could be added.");
             return true;
         }
 
