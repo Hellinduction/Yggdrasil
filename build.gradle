@@ -16,7 +16,7 @@ plugins {
 apply plugin: 'com.github.johnrengelman.shadow'
 
 group = 'dev.heypr'
-version = '1.36-SNAPSHOT'
+version = '1.37-SNAPSHOT'
 
 repositories {
     mavenCentral()

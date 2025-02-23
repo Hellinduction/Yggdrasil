@@ -136,8 +136,8 @@ public final class Yggdrasil extends JavaPlugin {
         registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this), true, true), new RealNameTabCompleter(this));
         registerCommand("addlives", new CommandWrapper(new AddLivesCommand(this)));
         registerCommand("lives", new CommandWrapper(new LivesCommand(this), true, true), new RealNameTabCompleter(this));
-        registerCommand("removeboogeyman", new CommandWrapper(new RemoveBoogeymanCommand(this)));
-        registerCommand("setboogeyman", new CommandWrapper(new SetBoogeymanCommand(this)));
+        registerCommand("removeboogeyman", new CommandWrapper(new RemoveBoogeymanCommand(this), true));
+        registerCommand("setboogeyman", new CommandWrapper(new SetBoogeymanCommand(this), true));
         registerCommand("randomizeboogeyman", new CommandWrapper(new RandomizeBoogeymanCommand(this), true));
         registerCommand("startsession", new CommandWrapper(new StartSessionCommand(this)));
         registerCommand("stopsession", new CommandWrapper(new StopSessionCommand(this)));
@@ -152,6 +152,8 @@ public final class Yggdrasil extends JavaPlugin {
         registerCommand("togglescoreboard", new CommandWrapper(new ToggleScoreboardCommand(this)));
         registerCommand("shufflenames", new CommandWrapper(new ShuffleNamesCommand(this), true));
         registerCommand("realname", new CommandWrapper(new RealNameCommand(this), true), new RealNameTabCompleter(this));
+        registerCommand("boogeymencount", new CommandWrapper(new BoogeyMenCountCommand(this), true, false));
+        registerCommand("addrandomboogeyman", new CommandWrapper(new AddRandomBoogeyManCommand(this), true));
 
         registerCommand("fentanyl", new CommandWrapper(new FentanylCommand(this), false, false, false));
 

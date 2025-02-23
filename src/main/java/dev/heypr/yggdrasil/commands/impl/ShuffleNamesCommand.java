@@ -29,6 +29,7 @@ public final class ShuffleNamesCommand implements CommandExecutor {
 
         final List<Player> players = playerData.stream()
                 .filter(PlayerData::isOnline)
+                .filter(data -> data.getLives() > 0)
                 .map(data -> data.getPlayer())
                 .collect(Collectors.toUnmodifiableList());
 

@@ -10,36 +10,36 @@ softdepend:
   - PlaceholderAPI
 commands:
   lives:
-    description: Shows the number of lives you have left.
+    description: Shows the number of lives you have left
     aliases: [l]
   addlives:
     permission: yggdrasil.addlives
-    description: Add/set a number of lives to a player.
+    description: Add/set a number of lives to a player
     aliases: [al, setlives]
   givelife:
-    description: Sets the number of lives you have left.
+    description: Sets the number of lives you have left
     aliases: [gl]
   startsession:
     permission: yggdrasil.startsession
-    description: Starts the game session.
+    description: Starts the game session
   stopsession:
     permission: yggdrasil.stopsession
-    description: Stops the game session.
+    description: Stops the game session
   removeboogeyman:
     permission: yggdrasil.removeboogeyman
-    description: Removes the boogeyman from the game.
+    description: Removes the boogeyman from the game
     aliases: [rebm]
   setboogeyman:
     permission: yggdrasil.setboogeyman
-    description: Sets the boogeyman.
+    description: Sets the boogeyman
     aliases: [sbm]
   randomizeboogeyman:
     permission: yggdrasil.randomizeboogeyman
-    description: Randomizes the boogeyman.
+    description: Randomizes the boogeyman
     aliases: [rabm]
   addplayer:
     permission: yggdrasil.addplayer
-    description: Adds a player to the game.
+    description: Adds a player to the game
     aliases: [ap]
   skin:
     permission: yggdrasil.skin
@@ -77,3 +77,11 @@ commands:
   realname:
     permission: yggdrasil.realname
     description: Get the real name of a player
+  boogeymencount:
+    permission: yggdrasil.boogeymencount
+    description: Displays a count of how many boogeymen there currently are
+    aliases: [boogeymancount, countboogeymen, countboogeyman]
+  addrandomboogeyman:
+    permission: yggdrasil.addrandomboogeyman
+    description: Add a random boogeyman
+    aliases: [arb]
