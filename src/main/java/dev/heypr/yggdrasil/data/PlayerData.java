@@ -235,6 +235,9 @@ public class PlayerData {
         if (from == UpdateFrom.JOIN)
             manager.hidePlayer(player);
 
+        if (disguisedAsData != null)
+            manager.updateNick(player, disguisedAsData.getUsername());
+
         manager.skin(player, skinFile, disguisedAsData, success -> {
             if (from == UpdateFrom.JOIN && !success)
                 manager.refreshPlayer(player);
@@ -372,13 +375,15 @@ public class PlayerData {
     }
 
     public void checkGraduate() {
-        if (Yggdrasil.plugin.isCullingSession && this.lastChance && this.kills >= 3 && this.lives == 0) {
+        final int requiredKills = Yggdrasil.plugin.getConfig().getInt("values.kills_to_graduate");
+
+        if (Yggdrasil.plugin.isCullingSession && this.lastChance && this.kills >= requiredKills && this.lives == 0) {
             this.addLives(1);
 
             final Player player = this.getPlayer();
 
             if (player != null && player.isOnline())
-                player.sendMessage(ChatColor.GREEN + "You successfully got 3 kills, you have regained a life!");
+                player.sendMessage(ChatColor.GREEN + String.format("You successfully got %s kills, you have regained a life!", requiredKills));
         }
     }
 

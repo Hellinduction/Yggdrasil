@@ -40,9 +40,9 @@ public class PlayerJoinListener implements Listener {
 
     @SuppressWarnings("all")
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-        String originalUsername = player.getName();
+    public void onPlayerJoin(final PlayerJoinEvent event) {
+        final Player player = event.getPlayer();
+        final String originalUsername = player.getName();
 
         plugin.getOriginalUsernameMap().put(player.getUniqueId(), originalUsername);
         plugin.skinManager.saveSkinData(player);

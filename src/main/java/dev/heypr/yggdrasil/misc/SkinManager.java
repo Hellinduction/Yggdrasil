@@ -454,14 +454,8 @@ public final class SkinManager {
         plugin.getScheduler().runTask(plugin, () -> {
             try {
                 this.refreshPlayer(player);
-
-                final GameProfile profile = this.updateSkin(player, skinData);
-
-                if (disguisedAs != null)
-                    this.updateNick(profile, disguisedAs.getUsername());
-
+                this.updateSkin(player, skinData);
                 this.updateSkinViaPackets(player);
-
                 this.refreshPlayer(player);
 
                 exceptionConsumer.accept(null);

@@ -84,7 +84,7 @@ public final class AddRandomBoogeyManCommand implements CommandExecutor {
             }, 40L, true);
         }
 
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&7Successfully added &a%s&7 random boogeyman.", count)));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&7Successfully added &a%s&7 random boogeymen.", count)));
         return true;
     }
 }

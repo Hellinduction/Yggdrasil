@@ -104,6 +104,9 @@ public final class Yggdrasil extends JavaPlugin {
 
             section.setComments("min_lives_through_give_life_command", Arrays.asList("The minimum amount of lives a player can go down to after giving some of their lives away"));
             section.set("min_lives_through_give_life_command", 1);
+
+            section.setComments("kills_to_graduate", Arrays.asList("Required number of kills for players on their last chance to return to 1 life"));
+            section.set("kills_to_graduate", 3);
         }
 
         this.saveConfig();
