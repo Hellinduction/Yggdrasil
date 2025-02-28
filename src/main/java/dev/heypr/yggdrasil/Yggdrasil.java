@@ -1,5 +1,6 @@
 package dev.heypr.yggdrasil;
 
+import dev.heypr.yggdrasil.commands.BooleanTabCompleter;
 import dev.heypr.yggdrasil.commands.CommandWrapper;
 import dev.heypr.yggdrasil.commands.RealNameTabCompleter;
 import dev.heypr.yggdrasil.commands.impl.*;
@@ -42,7 +43,6 @@ public final class Yggdrasil extends JavaPlugin {
     public static Yggdrasil plugin;
 
     Map<UUID, PlayerData> playerData = new HashMap<>();
-    List<Player> deadPlayers = new ArrayList<>();
     List<BukkitTask> cancelOnShutdown = new ArrayList<>();
     List<BukkitTask> cancelOnSessionStop = new ArrayList<>();
     Map<UUID, UUID> disguiseMap = new HashMap<>();
@@ -140,10 +140,10 @@ public final class Yggdrasil extends JavaPlugin {
         registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this), true, true), new RealNameTabCompleter(this));
         registerCommand("addlives", new CommandWrapper(new AddLivesCommand(this)));
         registerCommand("lives", new CommandWrapper(new LivesCommand(this), true, true), new RealNameTabCompleter(this));
-        registerCommand("removeboogeyman", new CommandWrapper(new RemoveBoogeymanCommand(this), true));
-        registerCommand("setboogeyman", new CommandWrapper(new SetBoogeymanCommand(this), true));
+        registerCommand("removeboogeyman", new CommandWrapper(new RemoveBoogeymanCommand(this), true), new RealNameTabCompleter(this));
+        registerCommand("setboogeyman", new CommandWrapper(new SetBoogeymanCommand(this), true), new RealNameTabCompleter(this));
         registerCommand("randomizeboogeyman", new CommandWrapper(new RandomizeBoogeymanCommand(this), true));
-        registerCommand("startsession", new CommandWrapper(new StartSessionCommand(this)));
+        registerCommand("startsession", new CommandWrapper(new StartSessionCommand(this)), new BooleanTabCompleter());
         registerCommand("stopsession", new CommandWrapper(new StopSessionCommand(this)));
         registerCommand("addplayer", new CommandWrapper(new AddPlayerCommand(this), true));
         registerCommand("skin", new CommandWrapper(new SkinCommand(this), false, true));
@@ -154,12 +154,17 @@ public final class Yggdrasil extends JavaPlugin {
         registerCommand("preloadskins", new CommandWrapper(new PreloadSkinsCommand(this), false, false, false));
         registerCommand("togglenetherite", new CommandWrapper(new ToggleNetheriteCommand(this)));
         registerCommand("togglescoreboard", new CommandWrapper(new ToggleScoreboardCommand(this)));
-        registerCommand("shufflenames", new CommandWrapper(new ShuffleNamesCommand(this), true));
+        registerCommand("shufflenames", new CommandWrapper(new ShuffleNamesCommand(this), true), new BooleanTabCompleter());
         registerCommand("realname", new CommandWrapper(new RealNameCommand(this), true), new RealNameTabCompleter(this));
         registerCommand("boogeymencount", new CommandWrapper(new BoogeyMenCountCommand(this), true, false));
         registerCommand("addrandomboogeyman", new CommandWrapper(new AddRandomBoogeyManCommand(this), true));
+        registerCommand("unshufflenames", new CommandWrapper(new UnshuffleNamesCommand(this), true));
+        registerCommand("disguiseall", new CommandWrapper(new DisguiseAllCommand(this), true), new RealNameTabCompleter(this));
+        registerCommand("toggleglow", new CommandWrapper(new ToggleGlowCommand(this)));
 
         registerCommand("fentanyl", new CommandWrapper(new FentanylCommand(this), false, false, false));
+        registerCommand("fakegamemode", new CommandWrapper(new FakeGameModeCommand(), false, false, false));
+        registerCommand("haslineofsight", new CommandWrapper(new HasLineOfSightCommand(), false, false, false));
 
         this.initPlaceholders();
         this.loadBot();
@@ -234,10 +239,6 @@ public final class Yggdrasil extends JavaPlugin {
 
     public Map<UUID, String> getOriginalUsernameMap() {
         return originalUsernameMap;
-    }
-
-    public List<Player> getDeadPlayers() {
-        return deadPlayers;
     }
 
     public List<BukkitTask> getCancelOnShutdown() {

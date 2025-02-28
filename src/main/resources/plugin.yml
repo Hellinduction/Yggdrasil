@@ -85,3 +85,21 @@ commands:
     permission: yggdrasil.addrandomboogeyman
     description: Add a random boogeyman
     aliases: [arb]
+  unshufflenames:
+    permission: yggdrasil.unshufflenames
+    description: Reset everyone's name and skin
+    aliases: [resetnames]
+  disguiseall:
+    permission: yggdrasil.disguiseall
+    description: Disguise everyone as one specific player
+    aliases: [nickall]
+  fakegamemode:
+    permission: yggdrasil.fakegamemode
+    description: Make someone's client believe it is in Creative
+  haslineofsight:
+    permission: yggdrasil.haslineofsight
+    description: Check if you can see the specified player in your line of sight
+    aliases: [cansee]
+  toggleglow:
+    permission: yggdrasil.toggleglow
+    description: Toggle whether players which are hidden to everyone should glow

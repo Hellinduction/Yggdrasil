@@ -71,12 +71,14 @@ public class PlayerDeathListener implements Listener {
         if (data.hasLastChance())
             data.setLastChance(false);
 
+        final boolean lastChanceDeath = data.getLives() == 0 && plugin.isCullingSession;
+
         if (data.getLives() == -1) {
             return;
-        } else if (data.getLives() == 1 || (data.getLives() == 0 && plugin.isCullingSession)) {
+        } else if (data.getLives() == 1 || lastChanceDeath) {
             player.getWorld().strikeLightningEffect(player.getLocation());
 
-            if (keepInv) {
+            if (keepInv && lastChanceDeath) {
                 event.setKeepInventory(false);
                 event.setKeepLevel(false);
                 event.setShouldDropExperience(true);

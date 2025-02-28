@@ -44,6 +44,8 @@ public class PlayerJoinListener implements Listener {
         final Player player = event.getPlayer();
         final String originalUsername = player.getName();
 
+        player.setGlowing(false);
+
         plugin.getOriginalUsernameMap().put(player.getUniqueId(), originalUsername);
         plugin.skinManager.saveSkinData(player);
 

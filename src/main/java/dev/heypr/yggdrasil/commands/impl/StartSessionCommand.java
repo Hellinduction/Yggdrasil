@@ -10,16 +10,16 @@ import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-public class StartSessionCommand implements CommandExecutor, TabCompleter {
+public class StartSessionCommand implements CommandExecutor {
 
     private final Yggdrasil plugin;
 
@@ -138,15 +138,5 @@ public class StartSessionCommand implements CommandExecutor, TabCompleter {
 
         plugin.isSessionRunning = true;
         return true;
-    }
-
-    @Override
-    public @Nullable List<String> onTabComplete(final CommandSender sender, final Command command, final String label, final String[] args) {
-        if (args.length != 1)
-            return Collections.emptyList();
-
-        return Arrays.asList(String.valueOf(true), String.valueOf(false)).stream()
-                .filter(bool -> args[0].isEmpty() || bool.startsWith(args[0].toLowerCase()))
-                .collect(Collectors.toList());
     }
 }

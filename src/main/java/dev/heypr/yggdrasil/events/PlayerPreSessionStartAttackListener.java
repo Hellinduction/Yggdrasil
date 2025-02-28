@@ -2,6 +2,7 @@ package dev.heypr.yggdrasil.events;
 
 import dev.heypr.yggdrasil.Yggdrasil;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,7 +21,7 @@ public class PlayerPreSessionStartAttackListener implements Listener {
     @EventHandler
     public void onPlayerPreSessionStartAttack(PrePlayerAttackEntityEvent event) {
         if (!plugin.isSessionRunning) {
-            event.getPlayer().sendMessage("The session has not started yet!");
+            event.getPlayer().sendMessage(ChatColor.DARK_RED + "The session has not started yet!");
             event.setCancelled(true);
         }
     }

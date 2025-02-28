@@ -33,6 +33,7 @@ import java.util.function.Predicate;
 public class PlayerData {
     public enum UpdateFrom {
         UNKNOWN,
+        COMMAND,
         JOIN,
         SHUFFLE_NAMES
     }
@@ -166,7 +167,6 @@ public class PlayerData {
 
         this.lives = amount;
         this.update(originalLives);
-        this.updateColor();
     }
 
     public void addLives(int amount) {
@@ -174,7 +174,6 @@ public class PlayerData {
 
         this.lives += amount;
         this.update(originalLives);
-        this.updateColor();
     }
 
     public void decreaseLives(int amount) {
@@ -182,7 +181,6 @@ public class PlayerData {
 
         this.lives -= amount;
         this.update(originalLives);
-        this.updateColor();
     }
 
     private void updateColor() {
@@ -342,6 +340,8 @@ public class PlayerData {
         if (previousLives != Integer.MIN_VALUE)
             this.updateSkin(from);
 
+        this.updateColor();
+
         if (this.lives > 0 && this.lastChance)
             this.lastChance = false;
 
@@ -440,6 +440,14 @@ public class PlayerData {
 
         Yggdrasil.plugin.getCancelOnShutdown().add(task);
         Yggdrasil.plugin.getCancelOnSessionStop().add(task);
+    }
+
+    @Override
+    public boolean equals(final Object object) {
+        if (!(object instanceof PlayerData data))
+            return false;
+
+        return this.getUuid().equals(data.getUuid());
     }
 
     /**
