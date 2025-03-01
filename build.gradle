@@ -17,7 +17,7 @@ apply plugin: 'java'
 apply plugin: 'com.gradleup.shadow'
 
 group = 'dev.heypr'
-version = '1.43-SNAPSHOT'
+version = '1.44-SNAPSHOT'
 
 repositories {
     mavenCentral()

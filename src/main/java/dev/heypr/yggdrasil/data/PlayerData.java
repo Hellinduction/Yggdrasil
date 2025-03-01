@@ -356,13 +356,10 @@ public class PlayerData {
     }
 
     public void checkGivePlayerCompass() {
-        if (!this.hasLastChance())
-            return;
-
         if (!this.isOnline())
             return;
 
-        final boolean enabled = TogglePlayerTracker.isEnabled();
+        final boolean give = this.hasLastChance() && TogglePlayerTracker.isEnabled();
         final Player player = this.getPlayer();
         final CustomItemManager manager = Yggdrasil.plugin.customItemManager;
         final PlayerTracker tracker = manager.getItem(PlayerTracker.class);
@@ -370,13 +367,13 @@ public class PlayerData {
         final int index = tracker.indexOf(inventory);
 
         if (index != -1) {
-            if (!enabled)
+            if (!give)
                 inventory.setItem(index, null);
 
             return;
         }
 
-        if (!enabled)
+        if (!give)
             return;
 
         inventory.addItem(tracker.getItem());
@@ -400,8 +397,7 @@ public class PlayerData {
     }
 
     private void checkLastChance() {
-        if (Yggdrasil.plugin.isCullingSession && this.lives == 0)
-            this.setLastChance(true);
+        this.setLastChance(Yggdrasil.plugin.isCullingSession && this.lives == 0);
     }
 
     public int getKills() {
