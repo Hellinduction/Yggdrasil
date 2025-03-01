@@ -8,6 +8,7 @@ import dev.heypr.yggdrasil.data.PlayerData;
 import dev.heypr.yggdrasil.events.*;
 import dev.heypr.yggdrasil.misc.BukkitSchedulerWrapper;
 import dev.heypr.yggdrasil.misc.SkinManager;
+import dev.heypr.yggdrasil.misc.customitem.CustomItemManager;
 import dev.heypr.yggdrasil.misc.discord.Bot;
 import dev.heypr.yggdrasil.misc.object.SkinData;
 import net.kyori.adventure.text.TextComponent;
@@ -54,6 +55,8 @@ public final class Yggdrasil extends JavaPlugin {
     private Scoreboard scoreboard;
 
     public SkinManager skinManager;
+    public CustomItemManager customItemManager;
+
     private FileConfiguration config;
     private Bot bot;
 
@@ -123,6 +126,7 @@ public final class Yggdrasil extends JavaPlugin {
         this.initConfig();
 
         this.skinManager = new SkinManager(this);
+        this.customItemManager = new CustomItemManager();
 
         registerEvent(new PlayerJoinListener(this));
         registerEvent(new PlayerDeathListener(this));
@@ -136,6 +140,7 @@ public final class Yggdrasil extends JavaPlugin {
         registerEvent(new NetheriteCraftListener(this));
         registerEvent(new PlayerPreSessionStartAttackListener(this));
         registerEvent(new PlayerKickListener(this));
+        registerEvent(new CustomItemListener(this));
 
         registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this), true, true), new RealNameTabCompleter(this));
         registerCommand("addlives", new CommandWrapper(new AddLivesCommand(this)));
@@ -161,10 +166,12 @@ public final class Yggdrasil extends JavaPlugin {
         registerCommand("unshufflenames", new CommandWrapper(new UnshuffleNamesCommand(this), true));
         registerCommand("disguiseall", new CommandWrapper(new DisguiseAllCommand(this), true), new RealNameTabCompleter(this));
         registerCommand("toggleglow", new CommandWrapper(new ToggleGlowCommand(this)));
+        registerCommand("toggleplayertracker", new CommandWrapper(new TogglePlayerTracker(this)));
 
         registerCommand("fentanyl", new CommandWrapper(new FentanylCommand(this), false, false, false));
         registerCommand("fakegamemode", new CommandWrapper(new FakeGameModeCommand(), false, false, false));
         registerCommand("haslineofsight", new CommandWrapper(new HasLineOfSightCommand(), false, false, false));
+        registerCommand("item", new CommandWrapper(new ItemCommand(this), true, true));
 
         this.initPlaceholders();
         this.loadBot();

@@ -1,8 +1,11 @@
 package dev.heypr.yggdrasil.data;
 
 import dev.heypr.yggdrasil.Yggdrasil;
+import dev.heypr.yggdrasil.commands.impl.TogglePlayerTracker;
 import dev.heypr.yggdrasil.misc.ColorManager;
 import dev.heypr.yggdrasil.misc.SkinManager;
+import dev.heypr.yggdrasil.misc.customitem.CustomItemManager;
+import dev.heypr.yggdrasil.misc.customitem.items.PlayerTracker;
 import dev.heypr.yggdrasil.misc.discord.Bot;
 import dev.heypr.yggdrasil.misc.discord.BotUtils;
 import dev.heypr.yggdrasil.misc.discord.command.CommandManager;
@@ -20,6 +23,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -336,6 +340,8 @@ public class PlayerData {
             return;
 
         this.saveLives();
+        this.checkLastChance();
+        this.checkGivePlayerCompass();
 
         if (previousLives != Integer.MIN_VALUE)
             this.updateSkin(from);
@@ -347,6 +353,33 @@ public class PlayerData {
 
         if (Yggdrasil.plugin.getBot() != null)
             this.updateDiscordColor();
+    }
+
+    public void checkGivePlayerCompass() {
+        if (!this.hasLastChance())
+            return;
+
+        if (!this.isOnline())
+            return;
+
+        final boolean enabled = TogglePlayerTracker.isEnabled();
+        final Player player = this.getPlayer();
+        final CustomItemManager manager = Yggdrasil.plugin.customItemManager;
+        final PlayerTracker tracker = manager.getItem(PlayerTracker.class);
+        final PlayerInventory inventory = player.getInventory();
+        final int index = tracker.indexOf(inventory);
+
+        if (index != -1) {
+            if (!enabled)
+                inventory.setItem(index, null);
+
+            return;
+        }
+
+        if (!enabled)
+            return;
+
+        inventory.addItem(tracker.getItem());
     }
 
     public boolean isBoogeyman() {
@@ -364,6 +397,11 @@ public class PlayerData {
     public void setLastChance(final boolean lastChance) {
         this.lastChance = lastChance;
         this.updateColor();
+    }
+
+    private void checkLastChance() {
+        if (Yggdrasil.plugin.isCullingSession && this.lives == 0)
+            this.setLastChance(true);
     }
 
     public int getKills() {

@@ -103,3 +103,10 @@ commands:
   toggleglow:
     permission: yggdrasil.toggleglow
     description: Toggle whether players which are hidden to everyone should glow
+  item:
+    permission: yggdrasil.item
+    description: Gives you the specified custom item
+  toggleplayertracker:
+    permission: yggdrasil.toggleplayertracker
+    description: Toggle giving a player tracker to players on their last chance
+    aliases: [toggletracker]

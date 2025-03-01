@@ -31,7 +31,7 @@ public final class ToggleGlowCommand implements CommandExecutor {
         final Collection<PlayerData> playerData = plugin.getPlayerData().values();
 
         final List<Player> players = playerData.stream()
-                .filter(data -> data.getLives() > 0)
+                .filter(data -> !data.isDead())
                 .filter(PlayerData::isOnline)
                 .map(data -> data.getPlayer())
                 .filter(player -> !target.equals(player))
@@ -39,6 +39,17 @@ public final class ToggleGlowCommand implements CommandExecutor {
                 .collect(Collectors.toUnmodifiableList());
 
         return players.isEmpty() || players.stream().anyMatch(player -> !player.canSee(target) || player.hasLineOfSight(target));
+    }
+
+    private List<Player> getPlayers() {
+        final Collection<PlayerData> playerData = plugin.getPlayerData().values();
+        final List<Player> players = playerData.stream()
+                .filter(data -> !data.isDead())
+                .filter(PlayerData::isOnline)
+                .map(data -> data.getPlayer())
+                .collect(Collectors.toUnmodifiableList());
+
+        return players;
     }
 
     private void startScheduler() {
@@ -56,14 +67,7 @@ public final class ToggleGlowCommand implements CommandExecutor {
                 if (!plugin.isSessionRunning)
                     return;
 
-                final Collection<PlayerData> playerData = plugin.getPlayerData().values();
-                final List<Player> players = playerData.stream()
-                        .filter(data -> data.getLives() > 0)
-                        .filter(PlayerData::isOnline)
-                        .map(data -> data.getPlayer())
-                        .collect(Collectors.toUnmodifiableList());
-
-                for (final Player player : players) {
+                for (final Player player : getPlayers()) {
                     final boolean canBeSeen = canBeSeen(player);
                     player.setGlowing(!canBeSeen);
                 }
@@ -81,8 +85,12 @@ public final class ToggleGlowCommand implements CommandExecutor {
 
         if (!enabled)
             this.startScheduler();
-        else if (this.task != null)
+        else if (this.task != null) {
             this.task.cancel();
+
+            for (final Player player : this.getPlayers())
+                player.setGlowing(false);
+        }
 
         return true;
     }

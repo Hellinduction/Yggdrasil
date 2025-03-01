@@ -42,7 +42,7 @@ public final class ShuffleNamesCommand implements CommandExecutor {
         final Collection<PlayerData> playerData = plugin.getPlayerData().values();
 
         final List<OfflinePlayer> players = playerData.stream()
-                .filter(data -> data.getLives() > 0)
+                .filter(data -> !data.isDead())
                 .map(data -> data.getOfflinePlayer())
                 .collect(Collectors.toUnmodifiableList());
 
