@@ -347,6 +347,9 @@ public class PlayerData {
         this.checkLastChance();
         this.checkGivePlayerCompass();
 
+        if (this.lives > 0)
+            this.setTemporarilyDead(false);
+
         if (previousLives != Integer.MIN_VALUE)
             this.updateSkin(from);
 
