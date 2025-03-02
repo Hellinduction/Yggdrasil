@@ -50,14 +50,16 @@ public class PlayerData {
     private boolean lastChance;
     private int kills;
     private boolean temporarilyDead = false; // Only true the player dies on 1 life during a culling session
+    private boolean usedLastChance;
 
-    public PlayerData(final OfflinePlayer player, int lives) {
+    public PlayerData(final OfflinePlayer player, final int lives) {
         this.uuid = player.getUniqueId();
         this.username = Yggdrasil.plugin.getOriginalUsernameMap().containsKey(this.uuid) ? Yggdrasil.plugin.getOriginalUsernameMap().get(this.uuid) : player.getName();
         this.lives = lives;
         this.isBoogeyman = false;
         this.lastChance = false;
         this.kills = 0;
+        this.usedLastChance = hasUsedLastChance(this.uuid);
 
         this.update(Integer.MIN_VALUE);
     }
@@ -329,6 +331,10 @@ public class PlayerData {
             playerSection = section.getConfigurationSection(this.uuid.toString());
 
         playerSection.set("lives", this.lives);
+
+        if (this.usedLastChance)
+            playerSection.set("used_last_chance", true);
+
         Yggdrasil.plugin.saveConfig();
     }
 
@@ -343,8 +349,8 @@ public class PlayerData {
         if (previousLives == this.lives)
             return;
 
-        this.saveLives();
         this.checkLastChance();
+        this.saveLives();
         this.checkGivePlayerCompass();
 
         if (this.lives > 0)
@@ -411,8 +417,15 @@ public class PlayerData {
         this.temporarilyDead = temporarilyDead;
     }
 
+    public boolean hasUsedLastChance() {
+        return this.usedLastChance;
+    }
+
     private void checkLastChance() {
         this.setLastChance(Yggdrasil.plugin.isCullingSession && this.lives == 0);
+
+        if (this.hasLastChance() && !this.usedLastChance && !this.isDead())
+            this.usedLastChance = true;
     }
 
     public int getKills() {
@@ -512,6 +525,21 @@ public class PlayerData {
         final int lives = playerSection.getInt("lives");
 
         return lives;
+    }
+
+    /**
+     * Returns false if never stored
+     * @param uuid
+     * @return
+     */
+    public static boolean hasUsedLastChance(final UUID uuid) {
+        if (!Yggdrasil.plugin.getConfig().contains(String.format("players.%s", uuid.toString())))
+            return false;
+
+        final ConfigurationSection playerSection = Yggdrasil.plugin.getConfig().getConfigurationSection(String.format("players.%s", uuid));
+        final boolean usedLastChance = playerSection.getBoolean("used_last_chance");
+
+        return usedLastChance;
     }
 
     /**

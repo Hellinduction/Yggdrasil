@@ -71,7 +71,7 @@ public class PlayerDeathListener implements Listener {
         if (data.hasLastChance())
             data.setLastChance(false);
 
-        final boolean lastChanceDeath = data.getLives() == 0 && plugin.isCullingSession;
+        final boolean lastChanceDeath = (data.getLives() == 0 || (data.getLives() == 1 && data.hasUsedLastChance())) && plugin.isCullingSession;
 
         if (data.getLives() == -1) {
             return;
@@ -85,14 +85,18 @@ public class PlayerDeathListener implements Listener {
                 event.getDrops().addAll(originalDrops);
             }
 
-            if (data.getLives() == 1 && plugin.isCullingSession)
+            if (data.getLives() == 1 && plugin.isCullingSession && !lastChanceDeath)
                 data.setTemporarilyDead(true);
 
             data.resetNameAndSkin();
             plugin.getDisguiseMap().remove(data.getUuid());
         }
 
-        data.decreaseLives(1);
+        if (!lastChanceDeath)
+            data.decreaseLives(1);
+        else
+            data.setLives(-1);
+
         player.sendActionBar(Component.text("Lives: " + data.getDisplayLives()));
 
         ColorManager.setTabListName(player, data);

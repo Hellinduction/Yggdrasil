@@ -327,8 +327,8 @@ public final class Yggdrasil extends JavaPlugin {
         final List<Player> boogeyManPool = this.getBoogeyManPool(predicate);
         final int boogeyManPoolCount = boogeyManPool.size();
 
-        if (boogeyMen >= boogeyManPoolCount && boogeyManPoolCount != 1)
-            boogeyMen = boogeyManPoolCount - 1;
+        if (boogeyMen > boogeyManPoolCount && boogeyManPoolCount != 1)
+            boogeyMen = boogeyManPoolCount;
 
         if (boogeyMen < 0)
             boogeyMen = 0;
