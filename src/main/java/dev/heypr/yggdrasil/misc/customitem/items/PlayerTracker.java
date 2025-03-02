@@ -14,14 +14,13 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public final class PlayerTracker extends AbstractCustomItem {
     public PlayerTracker() {
-        super(Material.COMPASS, "&bPlayer Tracker", "&7&oRight click to track the nearest player.");
+        super(Material.COMPASS, "&bPlayer Tracker", "&7&oTracks the closest player to you.");
         super.setDropOnDeath(false);
 
         new BukkitRunnable() {
@@ -54,8 +53,16 @@ public final class PlayerTracker extends AbstractCustomItem {
                                     if (item.getType() != Material.COMPASS)
                                         return;
 
-                                    final Location nearest = getNearestPlayer(p).getLocation();
+                                    final Player nearestPlayer = getNearestPlayer(p);
+
+                                    if (nearestPlayer == null)
+                                        return;
+
+                                    final ChatColor color = getColor(player);
+                                    final Location nearest = nearestPlayer.getLocation();
+
                                     p.setCompassTarget(nearest);
+                                    p.sendActionBar(ChatColor.translateAlternateColorCodes('&', String.format("&bCurrently tracking %s%s&b.", color, nearestPlayer.getName())));
 
                                     final CompassMeta meta = (CompassMeta) item.getItemMeta();
 
@@ -110,33 +117,16 @@ public final class PlayerTracker extends AbstractCustomItem {
         return found;
     }
 
-    private String format(final double d) {
-        final DecimalFormat formatter = new DecimalFormat("#,###");
-        return formatter.format(d);
-    }
-
-    @Override
-    public void onUse(final OnUse use) {
-        if (!Yggdrasil.plugin.isSessionRunning)
-            return;
-
-        final Player p = use.player();
-        final Player nearestPlayer = this.getNearestPlayer(p);
-
-        if (nearestPlayer == null) {
-            p.sendMessage(ChatColor.RED + "No nearby players found :(");
-            return;
-        }
-
-        final int lives = PlayerData.retrieveLives(nearestPlayer.getUniqueId());
+    private ChatColor getColor(final Player player) {
+        final int lives = PlayerData.retrieveLives(player.getUniqueId());
         final ChatColor color = ColorManager.getColor(lives);
-        final double dist = Math.floor(p.getLocation().distance(nearestPlayer.getLocation()));
 
-        p.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("%s%s&7 is %s blocks away.", color, nearestPlayer.getName(), this.format(dist))));
+        return color;
     }
 
     @Override
-    public void onPlace(final OnPlace place) {
+    public void onUse(final OnUse use) {}
 
-    }
+    @Override
+    public void onPlace(final OnPlace place) {}
 }
