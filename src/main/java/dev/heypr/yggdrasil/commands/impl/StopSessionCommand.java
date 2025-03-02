@@ -37,6 +37,7 @@ public class StopSessionCommand implements CommandExecutor {
                 playerData.checkLives();
             }
 
+            playerData.setTemporarilyDead(false);
             playerData.setRevealedData(false);
             playerData.resetNameAndSkin();
         });

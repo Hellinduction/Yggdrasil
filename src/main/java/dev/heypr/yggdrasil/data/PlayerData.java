@@ -49,6 +49,7 @@ public class PlayerData {
     private boolean isBoogeyman;
     private boolean lastChance;
     private int kills;
+    private boolean temporarilyDead = false; // Only true the player dies on 1 life during a culling session
 
     public PlayerData(final OfflinePlayer player, int lives) {
         this.uuid = player.getUniqueId();
@@ -62,6 +63,9 @@ public class PlayerData {
     }
 
     public boolean isDead() {
+        if (this.isTemporarilyDead())
+            return true;
+
         if (this.lives > 0 || (Yggdrasil.plugin.isCullingSession && !(this.lives < 0)))
             return false;
 
@@ -394,6 +398,14 @@ public class PlayerData {
     public void setLastChance(final boolean lastChance) {
         this.lastChance = lastChance;
         this.updateColor();
+    }
+
+    public boolean isTemporarilyDead() {
+        return this.temporarilyDead;
+    }
+
+    public void setTemporarilyDead(final boolean temporarilyDead) {
+        this.temporarilyDead = temporarilyDead;
     }
 
     private void checkLastChance() {

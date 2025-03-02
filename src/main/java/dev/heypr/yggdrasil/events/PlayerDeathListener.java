@@ -85,6 +85,9 @@ public class PlayerDeathListener implements Listener {
                 event.getDrops().addAll(originalDrops);
             }
 
+            if (data.getLives() == 1 && plugin.isCullingSession)
+                data.setTemporarilyDead(true);
+
             data.resetNameAndSkin();
             plugin.getDisguiseMap().remove(data.getUuid());
         }
