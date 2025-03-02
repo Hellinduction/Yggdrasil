@@ -99,6 +99,7 @@ public final class PlayerTracker extends AbstractCustomItem {
                 .map(entity -> (Player) entity)
                 .filter(ps -> Yggdrasil.plugin.getPlayerData().containsKey(ps.getUniqueId()))
                 .filter(ps -> !Yggdrasil.plugin.getPlayerData().get(ps.getUniqueId()).isDead())
+                .filter(ps -> ps.getGameMode() != GameMode.SPECTATOR) // Just extra filter condition in case isDeath() glitches
                 .collect(Collectors.toList());
 
         Player found = null;
