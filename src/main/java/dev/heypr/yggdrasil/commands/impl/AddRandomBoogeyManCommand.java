@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public final class AddRandomBoogeyManCommand implements CommandExecutor {
     private final Yggdrasil plugin;
@@ -83,6 +84,42 @@ public final class AddRandomBoogeyManCommand implements CommandExecutor {
                 }, 20L, true);
             }, 40L, true);
         }
+
+        final List<Player> players = plugin.getServer().getOnlinePlayers().stream()
+                .filter(player -> playerData.containsKey(player.getUniqueId()))
+                .filter(player -> !boogeyMen.contains(player))
+                .filter(player -> !playerData.get(player.getUniqueId()).isDead())
+                .collect(Collectors.toUnmodifiableList());
+
+        players.forEach(player -> {
+            if (!playerData.get(player.getUniqueId()).isBoogeyman()) {
+                plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
+                    final int lives = PlayerData.retrieveLivesOrDefault(player.getUniqueId(), plugin.randomLives());
+                    playerData.putIfAbsent(player.getUniqueId(), new PlayerData(player, lives));
+
+                    final boolean showTitle = plugin.isCullingSession || PlayerData.retrieveLives(player.getUniqueId()) != 0;
+                    final PlayerData data = playerData.get(player.getUniqueId());
+
+                    if (showTitle) {
+                        player.sendTitle(ChatColor.GREEN + "3", "", 10, 20, 10);
+                        plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
+                            player.sendTitle(ChatColor.YELLOW + "2", "", 10, 20, 10);
+                            plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
+                                player.sendTitle(ChatColor.RED + "1", "", 10, 20, 10);
+                                plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
+                                    player.sendTitle(ChatColor.YELLOW + "You are...", "", 10, 70, 20);
+                                    plugin.getSchedulerWrapper().runTaskLater(plugin, () -> {
+                                        player.sendTitle(ChatColor.GREEN + "NOT THE BOOGEYMAN!", "", 10, 70, 20);
+
+                                        data.setRevealedData(true);
+                                    }, 60L, true);
+                                }, 20L, true);
+                            }, 20L, true);
+                        }, 20L, true);
+                    }
+                }, 40L, true);
+            }
+        });
 
         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&7Successfully added &a%s&7 random boogeymen.", count)));
         return true;

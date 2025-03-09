@@ -520,9 +520,8 @@ public final class SkinManager {
                     if (d != null)
                         success.accept(d);
                 });
-            } else if (data != null) {
+            } else if (data != null)
                 success.accept(data);
-            }
         });
     }
 }
