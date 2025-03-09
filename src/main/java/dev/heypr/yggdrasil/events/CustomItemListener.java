@@ -157,7 +157,7 @@ public final class CustomItemListener implements Listener {
                 return clickedInventory != null && !clickedInventory.equals(inventory);
 
             case MOVE_TO_OTHER_INVENTORY:
-                return clickedInventory != null && clickedInventory.getType() == InventoryType.PLAYER;
+                return clickedInventory != null && clickedInventory.getType() == InventoryType.PLAYER && e.getView() != null && !clickedInventory.equals(e.getView().getTopInventory());
 
             default:
                 return false;

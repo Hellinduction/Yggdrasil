@@ -88,7 +88,7 @@ public final class NetheriteCraftListener implements Listener {
                 return clickedInventory != null && clickedInventory.getType() != null && clickedInventory.getType() == InventoryType.SMITHING;
 
             case MOVE_TO_OTHER_INVENTORY:
-                return clickedInventory != null && clickedInventory.getType() == InventoryType.PLAYER;
+                return clickedInventory != null && clickedInventory.getType() == InventoryType.PLAYER && e.getView() != null && e.getView().getTopInventory() != null && e.getView().getTopInventory().getType() == InventoryType.SMITHING;
 
             default:
                 return false;
