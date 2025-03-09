@@ -44,26 +44,29 @@ public class AddPlayerCommand implements CommandExecutor {
 
         final Pair<Integer, Boolean> pair = PlayerData.retrieveLivesOrDefaultAsPair(target.getUniqueId(), plugin.randomLives());
         final PlayerData data = new PlayerData(target, pair.getKey());
-        final boolean culling = plugin.isCullingSession && data.getLives() == 0;
 
-        if (culling || !plugin.isCullingSession) {
-            target.setGameMode(GameMode.SURVIVAL);
-
-            target.clearActivePotionEffects();
-
-            final TemporaryPlayerData temporaryPlayerData = TemporaryPlayerData.get(target);
-
-            for (final PotionEffect effect : temporaryPlayerData.getEffects())
-                target.addPotionEffect(effect);
-
-            if (culling && PlayerData.retrieveLives(target.getUniqueId()) == 0)
-                data.setLastChance(true);
-
-            plugin.getPlayerData().putIfAbsent(target.getUniqueId(), data);
-
-            data.checkLives();
-            data.displayLives(pair.getValue(), true);
+        if (data.isDead()) {
+            sender.sendMessage(ChatColor.RED + "That player is dead and therefor cannot be added.");
+            return true;
         }
+
+        final boolean lastChance = plugin.isCullingSession && data.getLives() == 0;
+
+        target.setGameMode(GameMode.SURVIVAL);
+        target.clearActivePotionEffects();
+
+        final TemporaryPlayerData temporaryPlayerData = TemporaryPlayerData.get(target);
+
+        for (final PotionEffect effect : temporaryPlayerData.getEffects())
+            target.addPotionEffect(effect);
+
+        if (lastChance && PlayerData.retrieveLives(target.getUniqueId()) == 0)
+            data.setLastChance(true);
+
+        plugin.getPlayerData().putIfAbsent(target.getUniqueId(), data);
+
+        data.checkLives();
+        data.displayLives(pair.getValue(), true);
 
         sender.sendMessage(ChatColor.GREEN + "Player " + target.getName() + " added.");
         return true;
