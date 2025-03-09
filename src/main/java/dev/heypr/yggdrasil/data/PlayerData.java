@@ -300,9 +300,21 @@ public class PlayerData {
             return;
 
         final String discordId = section.getName();
-        final User user = Bot.bot.getUserById(discordId);
         final Guild guild = EventListener.guild;
+
+        if (guild == null)
+            return;
+
+        final User user = Bot.bot.getUserById(discordId);
+
+        if (user == null)
+            return;
+
         final Member member = guild.getMember(user);
+
+        if (member == null)
+            return;
+
         final ConfigurationSection rolesSection = EventListener.getRoles(guild.getId());
 
         if (rolesSection == null)
