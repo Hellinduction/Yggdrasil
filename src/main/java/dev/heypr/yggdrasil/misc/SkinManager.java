@@ -500,7 +500,7 @@ public final class SkinManager {
                     callback.accept(true); // Likely succeeded to set skin
             });
 
-            if (data == null && exception == null && callback != null) {
+            if (data == null && disguiseAs == null && exception == null && callback != null) {
                 callback.accept(false);
                 return;
             }

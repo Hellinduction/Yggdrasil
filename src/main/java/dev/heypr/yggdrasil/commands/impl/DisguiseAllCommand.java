@@ -40,8 +40,10 @@ public final class DisguiseAllCommand implements CommandExecutor {
         final Collection<PlayerData> playerData = plugin.getPlayerData().values();
         final Map<UUID, UUID> disguiseMap = plugin.getDisguiseMap();
 
+        disguiseMap.clear();
+
         for (final PlayerData data : playerData) {
-            if (data.equals(playerData))
+            if (data.equals(targetData))
                 continue;
 
             disguiseMap.put(data.getUuid(), targetData.getUuid());
