@@ -143,7 +143,7 @@ public final class Yggdrasil extends JavaPlugin {
         registerEvent(new CustomItemListener(this));
 
         registerCommand("givelife", new CommandWrapper(new GiveLifeCommand(this), true, true), new RealNameTabCompleter(this));
-        registerCommand("addlives", new CommandWrapper(new AddLivesCommand(this)));
+        registerCommand("addlives", new CommandWrapper(new AddLivesCommand(this)), new RealNameTabCompleter(this));
         registerCommand("lives", new CommandWrapper(new LivesCommand(this), true, true), new RealNameTabCompleter(this));
         registerCommand("removeboogeyman", new CommandWrapper(new RemoveBoogeymanCommand(this), true), new RealNameTabCompleter(this));
         registerCommand("setboogeyman", new CommandWrapper(new SetBoogeymanCommand(this), true), new RealNameTabCompleter(this));

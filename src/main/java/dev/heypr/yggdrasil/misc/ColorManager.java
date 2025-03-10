@@ -136,9 +136,14 @@ public final class ColorManager {
         if (!userFolder.exists() || !userFolder.isDirectory())
             return null;
 
-        final String colorName = colors.getRoleName().replace("dark_", "");
-        final File skinFile = new File(userFolder, colorName + ".png");
+        String colorName = colors.getRoleName();
+        File skinFile = new File(userFolder, colorName + ".png");
         final Predicate<File> exists = file -> file != null && file.exists();
+
+        if (colors == Colors.DARK_GREEN && !exists.test(skinFile)) {
+            colorName = colorName.replace("dark_", "");
+            skinFile = new File(userFolder, colorName + ".png");
+        }
 
         if (!exists.test(skinFile)) {
             if (colors == Colors.GRAY) {
